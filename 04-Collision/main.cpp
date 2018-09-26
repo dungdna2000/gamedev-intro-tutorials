@@ -1,12 +1,11 @@
 /* =============================================================
 	INTRODUCTION TO GAME PROGRAMMING SE102
 	
-	SAMPLE 03 - KEYBOARD AND OBJECT STATE
+	SAMPLE 04 - COLLISION
 
 	This sample illustrates how to:
 
-		1/ Process keyboard input
-		2/ Control object state with keyboard events
+		1/ Handle collision with SweptAABB algorithm
 ================================================================ */
 
 #include <windows.h>
@@ -19,9 +18,10 @@
 #include "Textures.h"
 
 #include "Mario.h"
+#include "Brick.h"
 
 #define WINDOW_CLASS_NAME L"SampleWindow"
-#define MAIN_WINDOW_TITLE L"02 - Sprite animation"
+#define MAIN_WINDOW_TITLE L"04 - Collision"
 
 #define BACKGROUND_COLOR D3DCOLOR_XRGB(200, 200, 255)
 #define SCREEN_WIDTH 320
@@ -34,7 +34,10 @@
 #define ID_TEX_MISC 20
 
 CGame *game;
+
 CMario *mario;
+
+vector<LPGAMEOBJECT> objects;
 
 class CSampleKeyHander: public CKeyEventHandler
 {
@@ -52,6 +55,10 @@ void CSampleKeyHander::OnKeyDown(int KeyCode)
 	{
 	case DIK_SPACE:
 		mario->SetState(MARIO_STATE_JUMP);
+		break;
+	case DIK_A: 
+		mario->SetPosition(50.0f,0.0f);
+		mario->SetSpeed(0, 0);
 		break;
 	}
 }
@@ -86,12 +93,18 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 /*
 	Load all game resources 
 	In this example: load textures, sprites, animations and mario object
+
+	TO-DO: Enhance this function with loading resources from files
 */
 void LoadResources()
 {
 	CTextures * textures = CTextures::GetInstance();
 
-	textures->Add(ID_TEX_MARIO, L"textures\\mario.png",D3DCOLOR_XRGB(176, 224, 248));
+	textures->Add(ID_TEX_MARIO, L"textures\\mario.png",D3DCOLOR_XRGB(255, 255, 255));
+	textures->Add(ID_TEX_MISC, L"textures\\misc.png", D3DCOLOR_XRGB(176, 224, 248));
+
+	textures->Add(ID_TEX_BBOX, L"textures\\bbox.png", D3DCOLOR_XRGB(255, 255, 255));
+
 
 	CSprites * sprites = CSprites::GetInstance();
 	CAnimations * animations = CAnimations::GetInstance();
@@ -109,6 +122,8 @@ void LoadResources()
 	sprites->Add(10012, 155, 154, 170, 181, texMario);
 	sprites->Add(10013, 125, 154, 140, 181, texMario);
 
+	LPDIRECT3DTEXTURE9 texMisc = textures->Get(ID_TEX_MISC);
+	sprites->Add(20001, 408, 225, 424, 241, texMisc);
 
 	LPANIMATION ani;
 
@@ -133,13 +148,63 @@ void LoadResources()
 	ani->Add(10013);
 	animations->Add(501, ani);
 
-	mario = new CMario();
-	CMario::AddAnimation(400);		// idle right
-	CMario::AddAnimation(401);		// idle left
-	CMario::AddAnimation(500);		// walk right
-	CMario::AddAnimation(501);		// walk left
+	ani = new CAnimation(100);		// brick
+	ani->Add(20001);
+	animations->Add(601, ani);
 
-	mario->SetPosition(0.0f, 100.0f);
+
+	mario = new CMario();
+	mario->AddAnimation(400);		// idle right
+	mario->AddAnimation(401);		// idle left
+	mario->AddAnimation(500);		// walk right
+	mario->AddAnimation(501);		// walk left
+
+	mario->SetPosition(50.0f, 0);
+
+	objects.push_back(mario);
+
+	//
+	// Create a few bricks to test ground collision
+	//
+	for (int i = 0; i < 20; i++)
+	{
+		CBrick *brick = new CBrick();
+		brick->AddAnimation(601);
+		brick->SetPosition(0+i*36, 100);
+		objects.push_back(brick);
+	}
+
+	for (int i = 0; i < 20; i++)
+	{
+		CBrick *brick = new CBrick();
+		brick->AddAnimation(601);
+		brick->SetPosition(0 + i*22, 150);
+		objects.push_back(brick);
+	}
+
+
+	/*	brick = new CBrick();
+		brick->AddAnimation(601);
+		brick->SetPosition(200, 110);
+		objects.push_back(brick);
+	*/
+
+
+		/*CBrick *brick = new CBrick();
+		brick->AddAnimation(601);
+		brick->SetPosition(50,106);
+		objects.push_back(brick);
+	
+		brick = new CBrick();
+		brick->AddAnimation(601);
+		brick->SetPosition(66,90);
+		objects.push_back(brick);
+
+		brick = new CBrick();
+		brick->AddAnimation(601);
+		brick->SetPosition(72, 74);
+		objects.push_back(brick);*/
+
 }
 
 /*
@@ -148,7 +213,19 @@ void LoadResources()
 */
 void Update(DWORD dt)
 {
-	mario->Update(dt);
+	// We know that Mario is the first object in the list hence we won't add him into the colliable object list
+	// TO-DO: This is a "dirty" way, need a more organized way 
+	
+	vector<LPGAMEOBJECT> coObjects;
+	for (int i = 1; i < objects.size(); i++)
+	{
+		coObjects.push_back(objects[i]);
+	}
+
+	for (int i = 0; i < objects.size(); i++)
+	{
+		objects[i]->Update(dt,&coObjects);
+	}
 }
 
 /*
@@ -167,7 +244,8 @@ void Render()
 
 		spriteHandler->Begin(D3DXSPRITE_ALPHABLEND);
 
-		mario->Render();
+		for (int i = 0; i < objects.size(); i++)
+			objects[i]->Render();
 
 		spriteHandler->End();
 		d3ddv->EndScene();

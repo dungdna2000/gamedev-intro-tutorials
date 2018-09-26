@@ -17,6 +17,7 @@ class CGameObject
 	float vx;
 
 	int currentState;
+
 	vector<LPANIMATION> animations;
 
 public: 

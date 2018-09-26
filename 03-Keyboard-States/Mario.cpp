@@ -4,7 +4,7 @@ void CMario::Update(DWORD dt)
 {
 	CGameObject::Update(dt);
 
-	// simple JUMP
+	// simple fall down
 	vy += MARIO_GRAVITY;
 	if (y > 100) 
 	{
@@ -12,7 +12,7 @@ void CMario::Update(DWORD dt)
 	}
 
 	// simple screen edge collision!!!
-	if (vx > 0 && x > 280) x = 280;
+	if (vx > 0 && x > 290) x = 290;
 	if (vx < 0 && x < 0) x = 0;
 }
 
@@ -45,7 +45,8 @@ void CMario::SetState(int state)
 		nx = -1;
 		break;
 	case MARIO_STATE_JUMP: 
-		vy = -MARIO_JUMP_SPEED_Y;
+		if (y==100)
+			vy = -MARIO_JUMP_SPEED_Y;
 
 	case MARIO_STATE_IDLE: 
 		vx = 0;

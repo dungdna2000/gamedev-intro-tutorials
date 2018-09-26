@@ -154,10 +154,10 @@ void Render()
 
 		D3DXVECTOR3 p(20, 20, 0);
 		RECT r;
-		r.left = 215;
-		r.top = 194;
-		r.right = 231;
-		r.bottom = 220;
+		r.left = 274;
+		r.top = 234;
+		r.right = 292;
+		r.bottom = 264;
 		spriteHandler->Draw(textures->Get(ID_TEX_MARIO), &r, NULL, &p, D3DCOLOR_XRGB(255, 255, 255));
 		*/
 
