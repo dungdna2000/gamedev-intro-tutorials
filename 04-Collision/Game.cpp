@@ -226,9 +226,8 @@ void CGame::CheckCollision(
 	float br = dx > 0 ? mr + dx : mr;
 	float bb = dy > 0 ? mb + dy : mb;
 
-
-	//(b1.x + b1.w < b2.x || b1.x > b2.x + b2.w || b1.y + b1.h < b2.y || b1.y > b2.y + b2.h)
 	if (br < sl || bl > sr || bb < st || bt > sb) return;
+
 
 	if (dx == 0 && dy == 0) return;		// moving object is not moving > obvious no collision
 
@@ -290,18 +289,12 @@ void CGame::CheckCollision(
 	if (tx_entry > ty_entry)
 	{
 		ny = 0.0f;
-		if (dx > 0) 
-			nx = -1.0f;
-		else
-			nx = 1.0f;
+		dx > 0 ? nx = -1.0f : nx = 1.0f;
 	}
 	else 
 	{
 		nx = 0.0f;
-		if (dy > 0)
-			ny = -1.0f;
-		else
-			ny = 1.0f;
+		dy > 0?ny = -1.0f:ny = 1.0f;
 	}
 
 }

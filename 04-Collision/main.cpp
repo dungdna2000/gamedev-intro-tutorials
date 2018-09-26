@@ -19,6 +19,7 @@
 
 #include "Mario.h"
 #include "Brick.h"
+#include "Goomba.h"
 
 #define WINDOW_CLASS_NAME L"SampleWindow"
 #define MAIN_WINDOW_TITLE L"04 - Collision"
@@ -36,6 +37,7 @@
 CGame *game;
 
 CMario *mario;
+CGoomba *goomba;
 
 vector<LPGAMEOBJECT> objects;
 
@@ -56,7 +58,8 @@ void CSampleKeyHander::OnKeyDown(int KeyCode)
 	case DIK_SPACE:
 		mario->SetState(MARIO_STATE_JUMP);
 		break;
-	case DIK_A: 
+	case DIK_A: // reset
+		mario->SetState(MARIO_STATE_IDLE);
 		mario->SetPosition(50.0f,0.0f);
 		mario->SetSpeed(0, 0);
 		break;
@@ -70,11 +73,14 @@ void CSampleKeyHander::OnKeyUp(int KeyCode)
 
 void CSampleKeyHander::KeyState(BYTE *states)
 {
+	// disable control key when Mario die 
+	if (mario->GetState() == MARIO_STATE_DIE) return;
 	if (game->IsKeyDown(DIK_RIGHT))
 		mario->SetState(MARIO_STATE_WALKING_RIGHT);
 	else if (game->IsKeyDown(DIK_LEFT))
 		mario->SetState(MARIO_STATE_WALKING_LEFT);
-	else mario->SetState(MARIO_STATE_IDLE);
+	else
+		mario->SetState(MARIO_STATE_IDLE);
 }
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -102,6 +108,8 @@ void LoadResources()
 
 	textures->Add(ID_TEX_MARIO, L"textures\\mario.png",D3DCOLOR_XRGB(255, 255, 255));
 	textures->Add(ID_TEX_MISC, L"textures\\misc.png", D3DCOLOR_XRGB(176, 224, 248));
+	textures->Add(ID_TEX_ENEMY, L"textures\\enemies.png", D3DCOLOR_XRGB(3, 26, 110));
+
 
 	textures->Add(ID_TEX_BBOX, L"textures\\bbox.png", D3DCOLOR_XRGB(255, 255, 255));
 
@@ -122,8 +130,15 @@ void LoadResources()
 	sprites->Add(10012, 155, 154, 170, 181, texMario);
 	sprites->Add(10013, 125, 154, 140, 181, texMario);
 
+	sprites->Add(10099, 215, 120, 231, 135, texMario);		// die sprite
+
 	LPDIRECT3DTEXTURE9 texMisc = textures->Get(ID_TEX_MISC);
 	sprites->Add(20001, 408, 225, 424, 241, texMisc);
+
+	LPDIRECT3DTEXTURE9 texEnemy = textures->Get(ID_TEX_ENEMY);
+	sprites->Add(30001, 5, 14, 20, 29, texEnemy);
+	sprites->Add(30002, 25, 14, 40, 29, texEnemy);
+	sprites->Add(30003, 45, 21, 61, 29, texEnemy); // die sprite
 
 	LPANIMATION ani;
 
@@ -148,29 +163,43 @@ void LoadResources()
 	ani->Add(10013);
 	animations->Add(501, ani);
 
+	ani = new CAnimation(100);		// Mario die
+	ani->Add(10099);
+	animations->Add(599, ani);
+
+	
+
 	ani = new CAnimation(100);		// brick
 	ani->Add(20001);
 	animations->Add(601, ani);
 
+	ani = new CAnimation(300);		// Goomba walk
+	ani->Add(30001);
+	ani->Add(30002);
+	animations->Add(701, ani);
+
+	ani = new CAnimation(1000);		// Goomba dead
+	ani->Add(30003);
+	animations->Add(702, ani);
 
 	mario = new CMario();
 	mario->AddAnimation(400);		// idle right
 	mario->AddAnimation(401);		// idle left
 	mario->AddAnimation(500);		// walk right
 	mario->AddAnimation(501);		// walk left
-
+	mario->AddAnimation(599);		// die
 	mario->SetPosition(50.0f, 0);
-
 	objects.push_back(mario);
 
+
 	//
-	// Create a few bricks to test ground collision
+	// Create a lines of bricks
 	//
-	for (int i = 0; i < 20; i++)
+	for (int i = 0; i < 2; i++)
 	{
 		CBrick *brick = new CBrick();
 		brick->AddAnimation(601);
-		brick->SetPosition(0+i*36, 100);
+		brick->SetPosition(200+i*48.0f, 90);
 		objects.push_back(brick);
 	}
 
@@ -178,33 +207,40 @@ void LoadResources()
 	{
 		CBrick *brick = new CBrick();
 		brick->AddAnimation(601);
-		brick->SetPosition(0 + i*22, 150);
+		brick->SetPosition(0 + i*16.0f, 150);
 		objects.push_back(brick);
 	}
 
+	/*
+	CBrick *brick = new CBrick();
+	brick->AddAnimation(601);
+	brick->SetPosition(50,106);
+	objects.push_back(brick);
+	
+	brick = new CBrick();
+	brick->AddAnimation(601);
+	brick->SetPosition(66,90);
+	objects.push_back(brick);
 
-	/*	brick = new CBrick();
-		brick->AddAnimation(601);
-		brick->SetPosition(200, 110);
-		objects.push_back(brick);
+	brick = new CBrick();
+	brick->AddAnimation(601);
+	brick->SetPosition(72, 74);
+	objects.push_back(brick);
 	*/
 
+	goomba = new CGoomba();
+	goomba->AddAnimation(701);
+	goomba->AddAnimation(702);
+	objects.push_back(goomba);
+	goomba->SetPosition(200, 134);
+	goomba->SetState(GOOMBA_STATE_WALKING);
 
-		/*CBrick *brick = new CBrick();
-		brick->AddAnimation(601);
-		brick->SetPosition(50,106);
-		objects.push_back(brick);
-	
-		brick = new CBrick();
-		brick->AddAnimation(601);
-		brick->SetPosition(66,90);
-		objects.push_back(brick);
-
-		brick = new CBrick();
-		brick->AddAnimation(601);
-		brick->SetPosition(72, 74);
-		objects.push_back(brick);*/
-
+	goomba = new CGoomba();
+	goomba->AddAnimation(701);
+	goomba->AddAnimation(702);
+	objects.push_back(goomba);
+	goomba->SetPosition(220, 134);
+	goomba->SetState(GOOMBA_STATE_WALKING);
 }
 
 /*
@@ -215,7 +251,6 @@ void Update(DWORD dt)
 {
 	// We know that Mario is the first object in the list hence we won't add him into the colliable object list
 	// TO-DO: This is a "dirty" way, need a more organized way 
-	
 	vector<LPGAMEOBJECT> coObjects;
 	for (int i = 1; i < objects.size(); i++)
 	{
@@ -353,6 +388,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 
 	LoadResources();
+
+	SetWindowPos(hWnd, 0, 0, 0, SCREEN_WIDTH*2, SCREEN_HEIGHT*2, SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
+
 	Run();
 
 	return 0;

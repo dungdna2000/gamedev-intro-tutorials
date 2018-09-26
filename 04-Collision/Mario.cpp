@@ -1,8 +1,10 @@
 #include <algorithm>
+#include "debug.h"
 
 #include "Mario.h"
 #include "Game.h"
-#include "debug.h"
+
+#include "Goomba.h"
 
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
@@ -12,40 +14,14 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	// Simple fall down
 	vy += MARIO_GRAVITY*dt;
 
-
-	//
-	// Handle collision here
-	//
-
-	float t, nx, ny;
-
 	vector<LPCOLLISIONEVENT> coEvents;
+	vector<LPCOLLISIONEVENT> coEventsResult;
 
-	for (int i = 0; i < coObjects->size(); i++)
-	{
-		LPGAMEOBJECT coO = coObjects->at(i);
+	coEvents.clear();
 
-		float sl, st, sr, sb;
-		float ml, mt, mr, mb;
-
-		coO->GetBoundingBox(sl, st, sr, sb);
-		GetBoundingBox(ml, mt, mr, mb);
-
-		CGame::CheckCollision(
-			ml, mt, mr, mb,
-			dx, dy,
-			sl, st, sr, sb,
-			t, nx, ny
-		);
-
-		//DebugOut(L">> i: %d t:%0.5f n(%0.1f,%0.1f) obj(%1.0f,%1.0f) m(%0.5f,%0.5f)\n", i, t, nx, ny, coO->x, coO->y, this->x, this->y);
-
-		if (t > 0 && t <= 1.0f)
-		{
-			CCollisionEvent * e = new CCollisionEvent(t, nx, ny, coO);
-			coEvents.push_back(e);
-		}
-	}
+	// turn off collision when die!!!
+	if (state!=MARIO_STATE_DIE)
+		CheckCollision(coObjects, coEvents);
 
 	// No collision occured, proceed normally
 	if (coEvents.size()==0)
@@ -55,46 +31,53 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	}
 	else
 	{
-		std::sort(coEvents.begin(), coEvents.end(), CCollisionEvent::compare);
+		float min_tx, min_ty, nx = 0, ny;
 
-		float min_tx = 1.0f;
-		float min_ty = 1.0f;
-		float nx = 0;
-		float ny = 0;
+		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny);
 
-		for (int i = 0; i < coEvents.size(); i++)
-		{
-			LPCOLLISIONEVENT c = coEvents[i];
-
-			float x, y;
-			c->obj->GetPosition(x, y);
-
-			//DebugOut(L">> i: %d t:%0.5f n(%0.1f,%0.1f) obj(%1.0f,%1.0f) m(%0.5f,%0.5f)\n", i, c->t, c->nx, c->ny, x, y, this->x, this->y);
-
-			if (c->t < min_tx && c->nx != 0) {
-				min_tx = c->t; nx = c->nx;
-			} 
-			if (c->t < min_ty  && c->ny != 0) {
-				min_ty = c->t; ny = c->ny;
-			}
-		}
-
-		// block
-		x += min_tx*dx + nx*0.1f;
+		// block 
+		x += min_tx*dx + nx*0.1f;		// nx*0.1f : need to push out a bit to avoid overlapping next frame
 		y += min_ty*dy + ny*0.1f;
 		
 		if (nx!=0) vx = 0;
 		if (ny!=0) vy = 0;
 
-		for (int i = 0; i < coEvents.size(); i++) delete coEvents[i];
+		// handle non-block objects
+		for (UINT i = 0; i < coEventsResult.size(); i++)
+		{
+			LPCOLLISIONEVENT e = coEventsResult[i];
+
+			if (dynamic_cast<CGoomba *>(e->obj))
+			{
+				CGoomba *goomba = dynamic_cast<CGoomba *>(e->obj);
+
+				// mario jump on top
+				if (e->ny < 0)
+				{
+					if (goomba->GetState()!= GOOMBA_STATE_DIE)
+					{
+						goomba->SetState(GOOMBA_STATE_DIE);
+						vy = -MARIO_JUMP_DEFLECT_SPEED;
+					}
+				}
+				else if (e->nx != 0)
+				{
+					SetState(MARIO_STATE_DIE);
+				}
+			}
+		}
 	}
 
-	//if (y > 100) { y = 100; vy = 0; }
+	// clean up collision events
+	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
 }
 
 void CMario::Render()
 {
 	int ani;
+	if (state == MARIO_STATE_DIE)
+		ani = MARIO_ANI_DIE;
+	else
 	if (vx == 0)
 	{
 		if (nx>0) ani = MARIO_ANI_IDLE_RIGHT;
@@ -112,6 +95,7 @@ void CMario::Render()
 void CMario::SetState(int state)
 {
 	CGameObject::SetState(state);
+
 	switch (state)
 	{
 	case MARIO_STATE_WALKING_RIGHT:
@@ -123,11 +107,12 @@ void CMario::SetState(int state)
 		nx = -1;
 		break;
 	case MARIO_STATE_JUMP: 
-		//if (state!=MARIO_STATE_JUMP)
-			vy = -MARIO_JUMP_SPEED_Y;
-
+		vy = -MARIO_JUMP_SPEED_Y;
 	case MARIO_STATE_IDLE: 
 		vx = 0;
+		break;
+	case MARIO_STATE_DIE:
+		vy = -MARIO_DIE_DEFLECT_SPEED;
 		break;
 	}
 }
