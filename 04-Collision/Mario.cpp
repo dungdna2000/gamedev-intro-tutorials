@@ -19,9 +19,15 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	coEvents.clear();
 
-	// turn off collision when die!!!
+	// turn off collision when die or in untouchable
 	if (state!=MARIO_STATE_DIE)
 		CheckCollision(coObjects, coEvents);
+
+	if ( GetTickCount() - untouchable_start > MARIO_UNTOUCHABLE_TIME) 
+	{
+		untouchable_start = 0;
+		untouchable = 0;
+	}
 
 	// No collision occured, proceed normally
 	if (coEvents.size()==0)
@@ -62,7 +68,19 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				}
 				else if (e->nx != 0)
 				{
-					SetState(MARIO_STATE_DIE);
+					if (untouchable==0)
+					{
+						if (goomba->GetState()!=GOOMBA_STATE_DIE)
+						{
+							if (level > MARIO_LEVEL_SMALL)
+							{
+								level = MARIO_LEVEL_SMALL;
+								StartUntouchable();
+							}
+							else 
+								SetState(MARIO_STATE_DIE);
+						}
+					}
 				}
 			}
 		}
@@ -78,18 +96,34 @@ void CMario::Render()
 	if (state == MARIO_STATE_DIE)
 		ani = MARIO_ANI_DIE;
 	else
-	if (vx == 0)
+	if (level == MARIO_LEVEL_BIG)
 	{
-		if (nx>0) ani = MARIO_ANI_IDLE_RIGHT;
-		else ani = MARIO_ANI_IDLE_LEFT;
+		if (vx == 0)
+		{
+			if (nx>0) ani = MARIO_ANI_BIG_IDLE_RIGHT;
+			else ani = MARIO_ANI_BIG_IDLE_LEFT;
+		}
+		else if (vx > 0) 
+			ani = MARIO_ANI_BIG_WALKING_RIGHT; 
+		else ani = MARIO_ANI_BIG_WALKING_LEFT;
 	}
-	else if (vx > 0) 
-		ani = MARIO_ANI_WALKING_RIGHT; 
-	else ani = MARIO_ANI_WALKING_LEFT;
+	else if (level == MARIO_LEVEL_SMALL)
+	{
+		if (vx == 0)
+		{
+			if (nx>0) ani = MARIO_ANI_SMALL_IDLE_RIGHT;
+			else ani = MARIO_ANI_SMALL_IDLE_LEFT;
+		}
+		else if (vx > 0)
+			ani = MARIO_ANI_SMALL_WALKING_RIGHT;
+		else ani = MARIO_ANI_SMALL_WALKING_LEFT;
+	}
 
-	animations[ani]->Render(x, y);
+	int alpha = 255;
+	if (untouchable) alpha = 128;
+	animations[ani]->Render(x, y, alpha);
 
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CMario::SetState(int state)
@@ -121,7 +155,16 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 {
 	left = x;
 	top = y; 
-	right = x + MARIO_BIG_BBOX_WIDTH;
-	bottom = y + MARIO_BIG_BBOX_HEIGHT;
+
+	if (level==MARIO_LEVEL_BIG)
+	{
+		right = x + MARIO_BIG_BBOX_WIDTH;
+		bottom = y + MARIO_BIG_BBOX_HEIGHT;
+	}
+	else
+	{
+		right = x + MARIO_SMALL_BBOX_WIDTH;
+		bottom = y + MARIO_SMALL_BBOX_HEIGHT;
+	}
 }
 

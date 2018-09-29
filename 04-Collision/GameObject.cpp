@@ -30,6 +30,7 @@ LPCOLLISIONEVENT CGameObject::CheckCollision(LPGAMEOBJECT coO)
 
 	coO->GetBoundingBox(sl, st, sr, sb);
 
+	// deal with moving object: m speed = original m speed - collide object speed
 	float svx, svy;
 	coO->GetSpeed(svx, svy);
 
@@ -49,13 +50,6 @@ LPCOLLISIONEVENT CGameObject::CheckCollision(LPGAMEOBJECT coO)
 	);
 
 	CCollisionEvent * e = new CCollisionEvent(t, nx, ny, coO);
-	
-	/*if (sdx != 0 && (t > 0 && t <= 1.0f))	//boomba
-	{ 
-		DebugOut(L">> Goomba t=%0.5f \n", t);
-		coO->vx = 0;
-	}*/
-
 	return e;
 }
 
@@ -125,7 +119,7 @@ void CGameObject::RenderBoundingBox()
 	rect.right = (int)r - (int)l;
 	rect.bottom = (int)b - (int)t;
 
-	CGame::GetInstance()->GetSpriteHandler()->Draw(bbox, &rect, NULL, &p, D3DCOLOR_ARGB(64, 255, 255, 255));
+	CGame::GetInstance()->Draw(x, y, bbox, rect.left, rect.top, rect.right, rect.bottom, 32);
 }
 
 void CGameObject::AddAnimation(int aniId)

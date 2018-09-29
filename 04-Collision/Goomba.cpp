@@ -40,7 +40,7 @@ void CGoomba::Render()
 	}
 
 	animations[ani]->Render(x,y);
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CGoomba::SetState(int state)
