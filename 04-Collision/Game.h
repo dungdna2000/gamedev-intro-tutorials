@@ -47,7 +47,7 @@ public:
 	int IsKeyDown(int KeyCode);
 	void ProcessKeyboard();
 
-	static void CheckCollision(
+	static void SweptAABB(
 		float ml,			// move left 
 		float mt,			// move top
 		float mr,			// move right 

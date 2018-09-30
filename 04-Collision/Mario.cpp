@@ -19,10 +19,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	coEvents.clear();
 
-	// turn off collision when die or in untouchable
+	// turn off collision when die 
 	if (state!=MARIO_STATE_DIE)
-		CheckCollision(coObjects, coEvents);
+		CalcPotentialCollisions(coObjects, coEvents);
 
+	// reset untouchable timer if untouchable time has passed
 	if ( GetTickCount() - untouchable_start > MARIO_UNTOUCHABLE_TIME) 
 	{
 		untouchable_start = 0;
@@ -42,13 +43,13 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny);
 
 		// block 
-		x += min_tx*dx + nx*0.1f;		// nx*0.1f : need to push out a bit to avoid overlapping next frame
-		y += min_ty*dy + ny*0.1f;
+		x += min_tx*dx + nx*0.4f;		// nx*0.4f : need to push out a bit to avoid overlapping next frame
+		y += min_ty*dy + ny*0.4f;
 		
 		if (nx!=0) vx = 0;
 		if (ny!=0) vy = 0;
 
-		// handle non-block objects
+		// Collision logic with Goombas
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
 			LPCOLLISIONEVENT e = coEventsResult[i];
@@ -57,7 +58,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			{
 				CGoomba *goomba = dynamic_cast<CGoomba *>(e->obj);
 
-				// mario jump on top
+				// jump on top >> kill Goomba and deflect a bit 
 				if (e->ny < 0)
 				{
 					if (goomba->GetState()!= GOOMBA_STATE_DIE)
@@ -68,7 +69,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				}
 				else if (e->nx != 0)
 				{
-					if (untouchable==0)
+					/*if (untouchable==0)
 					{
 						if (goomba->GetState()!=GOOMBA_STATE_DIE)
 						{
@@ -80,7 +81,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							else 
 								SetState(MARIO_STATE_DIE);
 						}
-					}
+					}*/
 				}
 			}
 		}
@@ -123,7 +124,7 @@ void CMario::Render()
 	if (untouchable) alpha = 128;
 	animations[ani]->Render(x, y, alpha);
 
-	//RenderBoundingBox();
+	RenderBoundingBox();
 }
 
 void CMario::SetState(int state)

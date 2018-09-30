@@ -201,7 +201,7 @@ CGame::~CGame()
 /*
 	SweptAABB 
 */
-void CGame::CheckCollision(
+void CGame::SweptAABB(
 	float ml, float mt,	float mr, float mb,			
 	float dx, float dy,			
 	float sl, float st, float sr, float sb,

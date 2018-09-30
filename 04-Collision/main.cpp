@@ -6,7 +6,16 @@
 	This sample illustrates how to:
 
 		1/ Implement SweptAABB algorithm between moving objects
-		2/ Collision frame work
+		2/ Implement a simple (yet effective) collision frame work
+
+	Key functions: 
+		CGame::SweptAABB
+		CGameObject::SweptAABBEx
+		CGameObject::CalcPotentialCollisions
+		CGameObject::FilterCollision
+
+		CGameObject::GetBoundingBox
+		
 ================================================================ */
 
 #include <windows.h>
@@ -29,7 +38,7 @@
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
 
-#define MAX_FRAME_RATE 90
+#define MAX_FRAME_RATE 120
 
 #define ID_TEX_MARIO 0
 #define ID_TEX_ENEMY 10
@@ -231,23 +240,21 @@ void LoadResources()
 	mario->SetPosition(50.0f, 0);
 	objects.push_back(mario);
 
-
-	//
-	// Create 2 lines of bricks
-	//
 	for (int i = 0; i < 5; i++)
 	{
 		CBrick *brick = new CBrick();
 		brick->AddAnimation(601);
 		brick->SetPosition(100 + i*48.0f, 74);
 		objects.push_back(brick);
-	}
 
-	for (int i = 0; i < 7; i++)
-	{
-		CBrick *brick = new CBrick();
+		brick = new CBrick();
 		brick->AddAnimation(601);
-		brick->SetPosition(84+i*48.0f, 90);
+		brick->SetPosition(100 + i*48.0f, 90);
+		objects.push_back(brick);
+
+		brick = new CBrick();
+		brick->AddAnimation(601);
+		brick->SetPosition(84 + i*48.0f, 90);
 		objects.push_back(brick);
 	}
 
