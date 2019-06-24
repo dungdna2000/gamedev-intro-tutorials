@@ -57,7 +57,8 @@ void CGame::Init(HWND hWnd)
 */
 void CGame::Draw(float x, float y, LPDIRECT3DTEXTURE9 texture, int left, int top, int right, int bottom, int alpha)
 {
-	D3DXVECTOR3 p(x, y, 0);
+	D3DXVECTOR3 p(floor(x), floor(y), 0); // https://docs.microsoft.com/vi-vn/windows/desktop/direct3d9/directly-mapping-texels-to-pixels
+	// Try removing floor() to see blurry Mario
 	RECT r; 
 	r.left = left;
 	r.top = top;
