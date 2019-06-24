@@ -84,6 +84,17 @@ void CSampleKeyHander::OnKeyUp(int KeyCode)
 
 void CSampleKeyHander::KeyState(BYTE *states)
 {
+#if DEBUGGING_COLLISION
+	if (game->IsKeyDown(DIK_LEFT) && mario->vx >= 0)
+		mario->AddSpeed(-MARIO_WALKING_SPEED, 0);
+	if (game->IsKeyDown(DIK_RIGHT) && mario->vx <= 0)
+		mario->AddSpeed(MARIO_WALKING_SPEED, 0);
+	if (game->IsKeyDown(DIK_UP) && mario->vy >= 0)
+		mario->AddSpeed(0, -MARIO_WALKING_SPEED);
+	if (game->IsKeyDown(DIK_DOWN) && mario->vy <= 0)
+		mario->AddSpeed(0, MARIO_WALKING_SPEED);
+	
+#else
 	// disable control key when Mario die 
 	if (mario->GetState() == MARIO_STATE_DIE) return;
 	if (game->IsKeyDown(DIK_RIGHT))
@@ -92,6 +103,7 @@ void CSampleKeyHander::KeyState(BYTE *states)
 		mario->SetState(MARIO_STATE_WALKING_LEFT);
 	else
 		mario->SetState(MARIO_STATE_IDLE);
+#endif
 }
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
