@@ -5,9 +5,7 @@
 
 	This sample illustrates how to:
 
-		1/ Create a window
-		2/ Initiate DirectX 9, Direct3D, DirectX Sprite
-		3/ Draw a static brick sprite to the screen
+	1/ Re-Organize intro code to allow better scalability
 ================================================================ */
 
 #include <windows.h>
