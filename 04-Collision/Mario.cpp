@@ -54,7 +54,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		{
 			LPCOLLISIONEVENT e = coEventsResult[i];
 
-			if (dynamic_cast<CGoomba *>(e->obj))
+			if (dynamic_cast<CGoomba *>(e->obj)) // if e->obj is Goomba 
 			{
 				CGoomba *goomba = dynamic_cast<CGoomba *>(e->obj);
 
@@ -69,7 +69,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				}
 				else if (e->nx != 0)
 				{
-					/*if (untouchable==0)
+					if (untouchable==0)
 					{
 						if (goomba->GetState()!=GOOMBA_STATE_DIE)
 						{
@@ -81,7 +81,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							else 
 								SetState(MARIO_STATE_DIE);
 						}
-					}*/
+					}
 				}
 			}
 		}

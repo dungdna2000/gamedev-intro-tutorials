@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "03-Keyboard-States", "03-Ke
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "04-Collision", "04-Collision\04-Collision.vcxproj", "{0CEDCE73-9775-46A9-9D9D-B8424E7D599D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "00-Intro", "00-Intro\00-Intro.vcxproj", "{6849F7B7-30B7-4886-93C4-BE428757A111}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +81,20 @@ Global
 		{0CEDCE73-9775-46A9-9D9D-B8424E7D599D}.Release|Win32.Build.0 = Release|Win32
 		{0CEDCE73-9775-46A9-9D9D-B8424E7D599D}.Release|x64.ActiveCfg = Release|x64
 		{0CEDCE73-9775-46A9-9D9D-B8424E7D599D}.Release|x64.Build.0 = Release|x64
+		{6849F7B7-30B7-4886-93C4-BE428757A111}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{6849F7B7-30B7-4886-93C4-BE428757A111}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{6849F7B7-30B7-4886-93C4-BE428757A111}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{6849F7B7-30B7-4886-93C4-BE428757A111}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6849F7B7-30B7-4886-93C4-BE428757A111}.Debug|Win32.Build.0 = Debug|Win32
+		{6849F7B7-30B7-4886-93C4-BE428757A111}.Debug|x64.ActiveCfg = Debug|x64
+		{6849F7B7-30B7-4886-93C4-BE428757A111}.Debug|x64.Build.0 = Debug|x64
+		{6849F7B7-30B7-4886-93C4-BE428757A111}.Release|Any CPU.ActiveCfg = Release|Win32
+		{6849F7B7-30B7-4886-93C4-BE428757A111}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{6849F7B7-30B7-4886-93C4-BE428757A111}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{6849F7B7-30B7-4886-93C4-BE428757A111}.Release|Win32.ActiveCfg = Release|Win32
+		{6849F7B7-30B7-4886-93C4-BE428757A111}.Release|Win32.Build.0 = Release|Win32
+		{6849F7B7-30B7-4886-93C4-BE428757A111}.Release|x64.ActiveCfg = Release|x64
+		{6849F7B7-30B7-4886-93C4-BE428757A111}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

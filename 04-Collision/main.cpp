@@ -244,17 +244,17 @@ void LoadResources()
 	{
 		CBrick *brick = new CBrick();
 		brick->AddAnimation(601);
-		brick->SetPosition(100 + i*48.0f, 74);
+		brick->SetPosition(100.0f + i*60.0f, 74.0f);
 		objects.push_back(brick);
 
 		brick = new CBrick();
 		brick->AddAnimation(601);
-		brick->SetPosition(100 + i*48.0f, 90);
+		brick->SetPosition(100.0f + i*60.0f, 90.0f);
 		objects.push_back(brick);
 
 		brick = new CBrick();
 		brick->AddAnimation(601);
-		brick->SetPosition(84 + i*48.0f, 90);
+		brick->SetPosition(84.0f + i*60.0f, 90.0f);
 		objects.push_back(brick);
 	}
 
@@ -288,6 +288,7 @@ void Update(DWORD dt)
 {
 	// We know that Mario is the first object in the list hence we won't add him into the colliable object list
 	// TO-DO: This is a "dirty" way, need a more organized way 
+
 	vector<LPGAMEOBJECT> coObjects;
 	for (int i = 1; i < objects.size(); i++)
 	{
@@ -298,6 +299,16 @@ void Update(DWORD dt)
 	{
 		objects[i]->Update(dt,&coObjects);
 	}
+
+
+	// Update camera to follow mario
+	float cx, cy;
+	mario->GetPosition(cx, cy);
+
+	cx -= SCREEN_WIDTH / 2;
+	cy -= SCREEN_HEIGHT / 2;
+
+	CGame::GetInstance()->SetCamPos(cx, 0.0f /*cy*/);
 }
 
 /*
