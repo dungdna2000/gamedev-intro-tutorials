@@ -64,7 +64,6 @@ void LoadResources()
 
 
 	CSprites * sprites = CSprites::GetInstance();
-	CAnimations * animations = CAnimations::GetInstance();
 	
 	LPDIRECT3DTEXTURE9 texMario = textures->Get(ID_TEX_MARIO);
 
@@ -78,14 +77,14 @@ void LoadResources()
 	sprites->Add(10012, 155, 154, 170, 181, texMario);
 	sprites->Add(10013, 125, 154, 140, 181, texMario);
 
-	LPDIRECT3DTEXTURE9 texMisc = textures->Get(ID_TEX_MISC);
+	/*LPDIRECT3DTEXTURE9 texMisc = textures->Get(ID_TEX_MISC);
 	sprites->Add(20001, 300, 117, 315, 132, texMisc);
 	sprites->Add(20002, 318, 117, 333, 132, texMisc);
 	sprites->Add(20003, 336, 117, 351, 132, texMisc);
-	sprites->Add(20004, 354, 117, 369, 132, texMisc);
+	sprites->Add(20004, 354, 117, 369, 132, texMisc);*/
 	
 
-
+	CAnimations * animations = CAnimations::GetInstance();
 	LPANIMATION ani;
 
 	ani = new CAnimation(100);
@@ -110,11 +109,6 @@ void LoadResources()
 	*/
 	
 	mario = new CGameObject();
-	mario->AddAnimation(500);
-	mario->AddAnimation(501);
-	//mario->AddAnimation(510);
-
-
 	mario->SetPosition(10.0f, 100.0f);
 }
 

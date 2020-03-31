@@ -20,18 +20,14 @@ void CGameObject::Update(DWORD dt)
 void CGameObject::Render()
 {
 	LPANIMATION ani;
-	if (vx>0) ani = animations[0]; else ani = animations[1];
+	//if (vx>0) ani = animations[0]; else ani = animations[1];
+
+	if (vx>0) ani = CAnimations::GetInstance()->Get(500); 
+	else ani = CAnimations::GetInstance()->Get(501);
+
 	//ani = animations[0];
 	ani->Render(x, y);
 }
-
-void CGameObject::AddAnimation(int aniId)
-{
-	LPANIMATION ani = CAnimations::GetInstance()->Get(aniId);
-	animations.push_back(ani);
-}
-
-
 
 CGameObject::~CGameObject()
 {

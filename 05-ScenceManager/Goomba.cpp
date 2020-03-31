@@ -1,4 +1,8 @@
 #include "Goomba.h"
+CGoomba::CGoomba()
+{
+	SetState(GOOMBA_STATE_WALKING);
+}
 
 void CGoomba::GetBoundingBox(float &left, float &top, float &right, float &bottom)
 {
@@ -39,7 +43,8 @@ void CGoomba::Render()
 		ani = GOOMBA_ANI_DIE;
 	}
 
-	animations[ani]->Render(x,y);
+	animation_set->at(ani)->Render(x,y);
+
 	//RenderBoundingBox();
 }
 
@@ -56,4 +61,5 @@ void CGoomba::SetState(int state)
 		case GOOMBA_STATE_WALKING: 
 			vx = -GOOMBA_WALKING_SPEED;
 	}
+
 }

@@ -32,7 +32,7 @@ WARNING: This example contains a hell LOT of *sinful* programming practices
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
 
-#define MAX_FRAME_RATE 10
+#define MAX_FRAME_RATE 60
 
 
 LPDIRECT3D9 d3d = NULL;						// Direct3D handle
@@ -43,8 +43,9 @@ LPD3DXSPRITE spriteHandler = NULL;			// Sprite helper library to help us draw 2D
 
 LPDIRECT3DTEXTURE9 texBrick;				// texture object to store brick image
 
-int brick_x = 100;
-int brick_y = 100;
+float brick_x = 0.0f;
+float brick_vx = 0.1f;
+float brick_y = 100.0f;
 
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -84,7 +85,7 @@ void InitDirectX(HWND hWnd)
 	d3dpp.BackBufferCount = 1;
 
 	RECT r;
-	GetClientRect(hWnd, &r);	// retrieve Window width & height 
+	GetClientRect(hWnd, &r);	// retrieve window width & height 
 
 	d3dpp.BackBufferHeight = r.bottom + 1;
 	d3dpp.BackBufferWidth = r.right + 1;
@@ -156,6 +157,10 @@ void LoadResources()
 */
 void Update(DWORD dt)
 {
+	//brick_x++;
+
+	brick_x = brick_x + brick_vx*dt; 
+	if ( (brick_x > (SCREEN_WIDTH - 32)) || brick_x < 0) brick_vx = -brick_vx;
 }
 
 /*
@@ -170,7 +175,9 @@ void Render()
 
 		spriteHandler->Begin(D3DXSPRITE_ALPHABLEND);
 
-		D3DXVECTOR3 p((float)brick_x,(float)brick_y, 0);
+		D3DXVECTOR3 p(brick_x,100.0f, 0);
+
+		//D3DXVECTOR3 p(100.0f,10.0f, 0);
 		spriteHandler->Draw(texBrick, NULL, NULL, &p, D3DCOLOR_XRGB(255, 255, 255));
 
 		spriteHandler->End();

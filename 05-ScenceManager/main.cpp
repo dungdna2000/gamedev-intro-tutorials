@@ -1,42 +1,41 @@
 /* =============================================================
 	INTRODUCTION TO GAME PROGRAMMING SE102
 	
-	SAMPLE 01 - SKELETON CODE 
+	SAMPLE 05 - SCENCE MANAGER
 
 	This sample illustrates how to:
 
-	1/ Re-Organize intro code to allow better scalability
+		1/ Implement a scence manager 
+		2/ Load scene from "database", add/edit/remove scene without changing code 
+		3/ Dynamically move between scenes without hardcode logic 
+		
 ================================================================ */
 
 #include <windows.h>
 #include <d3d9.h>
 #include <d3dx9.h>
-#include <vector>
 
-#include "debug.h"
+#include "Utils.h"
 #include "Game.h"
 #include "GameObject.h"
+#include "Textures.h"
+
+#include "Mario.h"
+#include "Brick.h"
+#include "Goomba.h"
+
+#include "PlayScence.h"
 
 #define WINDOW_CLASS_NAME L"SampleWindow"
-#define MAIN_WINDOW_TITLE L"01 - Skeleton"
+#define MAIN_WINDOW_TITLE L"SAMPLE 05 - SCENCE MANAGER"
 
-#define BRICK_TEXTURE_PATH L"brick.png"
-#define MARIO_TEXTURE_PATH L"mario.png"
-
-
-#define BACKGROUND_COLOR D3DCOLOR_XRGB(255, 0, 0)
+#define BACKGROUND_COLOR D3DCOLOR_XRGB(255, 255, 200)
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
 
-#define MAX_FRAME_RATE 10
-
-using namespace std;
+#define MAX_FRAME_RATE 120
 
 CGame *game;
-CMario *mario;
-CGameObject *brick;
-
-//vector<LPGAMEOBJECT> objects;  
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -51,17 +50,7 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-/*
-	Load all game resources. In this example, create a brick object and mario object
-*/
-void LoadResources()
-{
-	mario = new CMario(MARIO_TEXTURE_PATH);
-	mario->SetPosition(10.0f, 130.0f);
 
-	brick = new CGameObject(BRICK_TEXTURE_PATH);
-	brick->SetPosition(10.0f, 100.0f);
-}
 
 /*
 	Update world status for this frame
@@ -69,12 +58,7 @@ void LoadResources()
 */
 void Update(DWORD dt)
 {
-	/*
-	for (int i=0;i<n;i++)
-		objects[i]->Update(dt);
-	*/
-	mario->Update(dt);
-	brick->Update(dt);
+	CGame::GetInstance()->GetCurrentScene()->Update(dt);
 }
 
 /*
@@ -93,10 +77,7 @@ void Render()
 
 		spriteHandler->Begin(D3DXSPRITE_ALPHABLEND);
 
-
-		mario->Render();
-		brick->Render();
-
+		CGame::GetInstance()->GetCurrentScene()->Render();
 
 		spriteHandler->End();
 		d3ddv->EndScene();
@@ -179,6 +160,9 @@ int Run()
 		if (dt >= tickPerFrame)
 		{
 			frameStart = now;
+
+			game->ProcessKeyboard();
+			
 			Update(dt);
 			Render();
 		}
@@ -195,8 +179,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	game = CGame::GetInstance();
 	game->Init(hWnd);
+	game->InitKeyboard();
 
-	LoadResources();
+	game->Load(L"mario-sample.txt");
+
+	SetWindowPos(hWnd, 0, 0, 0, SCREEN_WIDTH*2, SCREEN_HEIGHT*2, SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
+
 	Run();
 
 	return 0;

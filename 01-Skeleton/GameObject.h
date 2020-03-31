@@ -18,6 +18,7 @@ public:
 	void Render();
 	~CGameObject();
 };
+typedef CGameObject * LPGAMEOBJECT;
 
 class CMario : public CGameObject
 {

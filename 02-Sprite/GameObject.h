@@ -18,16 +18,21 @@ class CGameObject
 
 	int currentState;
 
+	//static vector<LPANIMATION> animations; 
 	vector<LPANIMATION> animations;
 
 public: 
 	void SetPosition(float x, float y) { this->x = x, this->y = y; }
 	void SetState(int state) { this->currentState = state; }
-	void AddAnimation(int aniId);
 
 	CGameObject();
 
 	void Update(DWORD dt);
 	void Render();
 	~CGameObject();
+};
+
+class Goomba : public CGameObject
+{
+	//static vector<LPANIMATION> animations; 
 };
