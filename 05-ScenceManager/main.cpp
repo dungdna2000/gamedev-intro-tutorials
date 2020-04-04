@@ -50,8 +50,6 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-
-
 /*
 	Update world status for this frame
 	dt: time period between beginning of last frame and beginning of this frame

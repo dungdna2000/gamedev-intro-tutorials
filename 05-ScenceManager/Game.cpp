@@ -376,12 +376,6 @@ void CGame::Load(LPCWSTR gameFile)
 	}
 	f.close();
 
-
-	//LPSCENE scene = new CPlayScene(1, L"scene1.txt");
-	//scenes[1] = scene;
-	//scene = new CPlayScene(2, L"scene2.txt");
-	//scenes[2] = scene;
-
 	DebugOut(L"[INFO] Loading game file : %s has been loaded successfully\n",gameFile);
 
 	SwitchScene(current_scene);
@@ -389,16 +383,16 @@ void CGame::Load(LPCWSTR gameFile)
 
 void CGame::SwitchScene(int scene_id)
 {
-	// IMPORTANT: has to implement "unload" previous scene assets to avoid duplicate resources
-	current_scene = scene_id;
+	DebugOut(L"[INFO] Switching to scene %d\n", scene_id);
 
-	LPSCENE s = scenes[current_scene];
-	s->Unload();
+	scenes[current_scene]->Unload();;
 
 	CTextures::GetInstance()->Clear();
 	CSprites::GetInstance()->Clear();
 	CAnimations::GetInstance()->Clear();
 
+	current_scene = scene_id;
+	LPSCENE s = scenes[scene_id];
 	CGame::GetInstance()->SetKeyHandler(s->GetKeyEventHandler());
-	s->Load();
+	s->Load();	
 }

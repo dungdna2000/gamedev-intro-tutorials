@@ -8,11 +8,16 @@
 #include "Goomba.h"
 #include "Portal.h"
 
-CMario::CMario() : CGameObject()
+CMario::CMario(float x, float y) : CGameObject()
 {
 	level = MARIO_LEVEL_BIG;
 	untouchable = 0;
 	SetState(MARIO_STATE_IDLE);
+
+	start_x = x; 
+	start_y = y; 
+	this->x = x; 
+	this->y = y; 
 }
 
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
@@ -106,7 +111,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			else if (dynamic_cast<CPortal *>(e->obj))
 			{
 				CPortal *p = dynamic_cast<CPortal *>(e->obj);
-				DebugOut(L"[INFO] Switching to scene %d", p->GetSceneId());
 				CGame::GetInstance()->SwitchScene(p->GetSceneId());
 			}
 		}
@@ -167,8 +171,10 @@ void CMario::SetState(int state)
 		vx = -MARIO_WALKING_SPEED;
 		nx = -1;
 		break;
-	case MARIO_STATE_JUMP: 
+	case MARIO_STATE_JUMP:
+		// TODO: need to check if Mario is *current* on a platform before allowing to jump again
 		vy = -MARIO_JUMP_SPEED_Y;
+		break; 
 	case MARIO_STATE_IDLE: 
 		vx = 0;
 		break;
@@ -193,5 +199,16 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 		right = x + MARIO_SMALL_BBOX_WIDTH;
 		bottom = y + MARIO_SMALL_BBOX_HEIGHT;
 	}
+}
+
+/*
+	Reset Mario status to the beginning state of a scene
+*/
+void CMario::Reset()
+{
+	SetState(MARIO_STATE_IDLE);
+	SetLevel(MARIO_LEVEL_BIG);
+	SetPosition(start_x, start_y);
+	SetSpeed(0, 0);
 }
 

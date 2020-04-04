@@ -145,11 +145,13 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_MARIO:
 		if (player!=NULL) 
 		{
-			DebugOut(L"[ERROR] MARIO object was created before! ");
+			DebugOut(L"[ERROR] MARIO object was created before!\n");
 			return;
 		}
-		obj = new CMario(); 
+		obj = new CMario(x,y); 
 		player = (CMario*)obj;  
+
+		DebugOut(L"[INFO] Player object created!\n");
 		break;
 	case OBJECT_TYPE_GOOMBA: obj = new CGoomba(); break;
 	case OBJECT_TYPE_BRICK: obj = new CBrick(); break;
@@ -240,11 +242,12 @@ void CPlayScene::Update(DWORD dt)
 		objects[i]->Update(dt, &coObjects);
 	}
 
+	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
+	if (player == NULL) return; 
 
 	// Update camera to follow mario
 	float cx, cy;
 	player->GetPosition(cx, cy);
-
 
 	CGame *game = CGame::GetInstance();
 	cx -= game->GetScreenWidth() / 2;
@@ -269,34 +272,30 @@ void CPlayScene::Unload()
 
 	objects.clear();
 	player = NULL;
+
+	DebugOut(L"[INFO] Scene %s unloaded! \n", sceneFilePath);
 }
 
 void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 {
 	//DebugOut(L"[INFO] KeyDown: %d\n", KeyCode);
 
-	CMario *mario = ((CPlayScene*)scence)->player;
+	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
 	switch (KeyCode)
 	{
 	case DIK_SPACE:
 		mario->SetState(MARIO_STATE_JUMP);
 		break;
-	case DIK_A: // reset
-		mario->SetState(MARIO_STATE_IDLE);
-		mario->SetLevel(MARIO_LEVEL_BIG);
-		mario->SetPosition(50.0f, 0.0f);
-		mario->SetSpeed(0, 0);
+	case DIK_A: 
+		mario->Reset();
 		break;
 	}
 }
 
-void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
-{}
-
 void CPlayScenceKeyHandler::KeyState(BYTE *states)
 {
 	CGame *game = CGame::GetInstance();
-	CMario *mario = ((CPlayScene*)scence)->player;
+	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
 
 	// disable control key when Mario die 
 	if (mario->GetState() == MARIO_STATE_DIE) return;
