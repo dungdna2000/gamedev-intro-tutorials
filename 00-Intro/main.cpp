@@ -14,6 +14,8 @@ This sample illustrates how to:
 - Use constants whenever possible 
 - 0 Warnings
 
+6/ Debug using __FILE__ __LINE__ 
+
 WARNING: This one file example has a hell LOT of *sinful* programming practices
 ================================================================ */
 
@@ -45,14 +47,18 @@ HWND hWnd = 0;
 LPDIRECT3D9 d3d = NULL;						// Direct3D handle
 LPDIRECT3DDEVICE9 d3ddv = NULL;				// Direct3D device object
 
-LPDIRECT3DSURFACE9 backBuffer = NULL;		
+LPDIRECT3DSURFACE9 backBuffer = NULL;
+int BackBufferWidth = 0;
+int BackBufferHeight = 0;
+
 LPD3DXSPRITE spriteHandler = NULL;			// Sprite helper library to help us draw 2D images 
 
 
 #define BRICK_TEXTURE_PATH L"brick.png"
 #define BRICK_START_X 30.0f
 #define BRICK_START_Y 10.0f
-#define BRICK_START_VX 0.1f
+#define BRICK_START_VX 0.2f
+#define BRICK_WIDTH 16.0f
 
 
 LPDIRECT3DTEXTURE9 texBrick;				// Texture object to store brick image
@@ -76,6 +82,9 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 // DEBUG SUPPORT FUNCTIONS //////////////
+#define _W(x)  __W(x)
+#define __W(x)  L##x
+
 #define VA_PRINTS(s) {				\
 		va_list argp;				\
 		va_start(argp, fmt);		\
@@ -115,8 +124,11 @@ void InitDirectX(HWND hWnd)
 	RECT r;
 	GetClientRect(hWnd, &r);
 
-	d3dpp.BackBufferHeight = r.bottom + 1;
-	d3dpp.BackBufferWidth = r.right + 1;
+	BackBufferWidth = r.right + 1;
+	BackBufferHeight = r.bottom + 1;
+
+	d3dpp.BackBufferHeight = BackBufferHeight;
+	d3dpp.BackBufferWidth = BackBufferWidth;
 
 	d3d->CreateDevice(
 		D3DADAPTER_DEFAULT,			// use default video card in the system, some systems have more than one video cards
@@ -171,15 +183,31 @@ void LoadResources()
 }
 
 /*
-	Update world status 
+	Update world status for this frame
 	dt: time period between beginning of last frame and beginning of this frame
 
 	IMPORTANT: no render-related code should be used inside this function. 
 */
 void Update(DWORD dt)
 {
-	brick_x += brick_vx*dt; 
-	if (brick_x <= 0 || brick_x >= SCREEN_WIDTH) brick_vx = -brick_vx;
+	//Uncomment the whole function to see the brick moves and bounces back when hitting left and right edges
+	
+	//brick_x += brick_vx*dt; 
+
+	//if (brick_x <= 0 || brick_x >= BackBufferWidth - BRICK_WIDTH) { 
+	//	
+	//	brick_vx = -brick_vx;
+
+	//	//Why not having these logics would make the brick disappear sometimes?  
+	//	if (brick_x <= 0)
+	//	{
+	//		brick_x = 0;
+	//	}
+	//	else if (brick_x >= BackBufferWidth - BRICK_WIDTH)
+	//	{
+	//		brick_x = BackBufferWidth - BRICK_WIDTH;
+	//	}
+	//} 
 }
 
 /*
@@ -214,7 +242,10 @@ HWND CreateGameWindow(HINSTANCE hInstance, int nCmdShow, int ScreenWidth, int Sc
 	wc.cbSize = sizeof(WNDCLASSEX);
 
 	wc.style = CS_HREDRAW | CS_VREDRAW;
-	wc.hInstance = hInstance;
+	wc.hInstance = hInstance;  
+	
+	//Try this to see how the debug function prints out file and line 
+	//wc.hInstance = (HINSTANCE)-100; 
 
 	wc.lpfnWndProc = (WNDPROC)WinProc;
 	wc.cbClsExtra = 0;
@@ -245,7 +276,7 @@ HWND CreateGameWindow(HINSTANCE hInstance, int nCmdShow, int ScreenWidth, int Sc
 	if (!hWnd)
 	{
 		DWORD ErrCode = GetLastError();
-		DebugOut(L"[ERROR] CreateWindow failed! ErrCode = %d\n", ErrCode);
+		DebugOut(L"[ERROR] CreateWindow failed! ErrCode: %d\nAt: %s %d \n", ErrCode, _W(__FILE__), __LINE__);
 		return 0;
 	}
 
