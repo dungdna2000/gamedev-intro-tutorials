@@ -39,8 +39,8 @@ HWND hWnd = 0;
 #define D3DCOLOR_WHITE D3DCOLOR_XRGB(255, 255, 255)
 
 #define BACKGROUND_COLOR D3DCOLOR_XRGB(0, 0, 0)
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
+#define WINDOW_WIDTH 640
+#define WINDOW_HEIGHT 480
 
 #define MAX_FRAME_RATE 120
 
@@ -335,7 +335,7 @@ void Cleanup()
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	hWnd = CreateGameWindow(hInstance, nCmdShow, SCREEN_WIDTH, SCREEN_HEIGHT);
+	hWnd = CreateGameWindow(hInstance, nCmdShow, WINDOW_WIDTH, WINDOW_HEIGHT);
 	if (hWnd == 0) return 0; 
 
 	InitDirectX(hWnd);
