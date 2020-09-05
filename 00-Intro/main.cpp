@@ -8,8 +8,13 @@ This sample illustrates how to:
 1/ Create a window
 2/ Initiate DirectX 9, Direct3D, DirectX Sprite
 3/ Draw a static brick sprite to the screen
+4/ Create frame rate independent movements 
 
-WARNING: This example contains a hell LOT of *sinful* programming practices
+5/ Some good C programming practices 
+- Use constants whenever possible 
+- 0 Warnings
+
+WARNING: This one file example has a hell LOT of *sinful* programming practices
 ================================================================ */
 
 #include <windows.h>
@@ -24,28 +29,37 @@ WARNING: This example contains a hell LOT of *sinful* programming practices
 #include <stdlib.h>
 
 #define WINDOW_CLASS_NAME L"SampleWindow"
-#define MAIN_WINDOW_TITLE L"00 - Intro"
+#define WINDOW_TITLE L"00 - Intro"
+#define WINDOW_ICON_PATH L"brick.ico" 
 
-#define BRICK_TEXTURE_PATH L"brick.png"
+HWND hWnd = 0; 
 
-#define BACKGROUND_COLOR D3DCOLOR_XRGB(255, 0, 0)
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 240
+#define D3DCOLOR_WHITE D3DCOLOR_XRGB(255, 255, 255)
 
-#define MAX_FRAME_RATE 60
+#define BACKGROUND_COLOR D3DCOLOR_XRGB(0, 0, 0)
+#define SCREEN_WIDTH 640
+#define SCREEN_HEIGHT 480
 
+#define MAX_FRAME_RATE 120
 
 LPDIRECT3D9 d3d = NULL;						// Direct3D handle
 LPDIRECT3DDEVICE9 d3ddv = NULL;				// Direct3D device object
 
-LPDIRECT3DSURFACE9 backBuffer = NULL;
-LPD3DXSPRITE spriteHandler = NULL;			// Sprite helper library to help us draw 2D image on the screen 
+LPDIRECT3DSURFACE9 backBuffer = NULL;		
+LPD3DXSPRITE spriteHandler = NULL;			// Sprite helper library to help us draw 2D images 
 
-LPDIRECT3DTEXTURE9 texBrick;				// texture object to store brick image
 
-float brick_x = 0.0f;
-float brick_vx = 0.1f;
-float brick_y = 100.0f;
+#define BRICK_TEXTURE_PATH L"brick.png"
+#define BRICK_START_X 30.0f
+#define BRICK_START_Y 10.0f
+#define BRICK_START_VX 0.1f
+
+
+LPDIRECT3DTEXTURE9 texBrick;				// Texture object to store brick image
+
+float brick_x = BRICK_START_X;
+float brick_vx = BRICK_START_VX;
+float brick_y = BRICK_START_Y;
 
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -61,19 +75,32 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+// DEBUG SUPPORT FUNCTIONS //////////////
+#define VA_PRINTS(s) {				\
+		va_list argp;				\
+		va_start(argp, fmt);		\
+		vswprintf_s(s, fmt, argp);	\
+		va_end(argp);				\
+}		
+
 void DebugOut(wchar_t *fmt, ...)
 {
-	va_list argp;
-	va_start(argp, fmt);
-	wchar_t dbg_out[4096];
-	vswprintf_s(dbg_out, fmt, argp);
-	va_end(argp);
-	OutputDebugString(dbg_out);
+	wchar_t s[4096];
+	VA_PRINTS(s);
+	OutputDebugString(s);
 }
+
+void DebugOutTitle(wchar_t *fmt, ...)
+{
+	wchar_t s[1024];
+	VA_PRINTS(s);
+	SetWindowText(hWnd, s);
+}
+//////////////////////////////////////////
 
 void InitDirectX(HWND hWnd)
 {
-	LPDIRECT3D9 d3d = Direct3DCreate9(D3D_SDK_VERSION);
+	d3d = Direct3DCreate9(D3D_SDK_VERSION);
 
 	D3DPRESENT_PARAMETERS d3dpp;
 
@@ -84,15 +111,16 @@ void InitDirectX(HWND hWnd)
 	d3dpp.BackBufferFormat = D3DFMT_X8R8G8B8;
 	d3dpp.BackBufferCount = 1;
 
+	// retrieve window width & height so that we can create backbuffer height & width accordingly 
 	RECT r;
-	GetClientRect(hWnd, &r);	// retrieve window width & height 
+	GetClientRect(hWnd, &r);
 
 	d3dpp.BackBufferHeight = r.bottom + 1;
 	d3dpp.BackBufferWidth = r.right + 1;
 
 	d3d->CreateDevice(
-		D3DADAPTER_DEFAULT,
-		D3DDEVTYPE_HAL,
+		D3DADAPTER_DEFAULT,			// use default video card in the system, some systems have more than one video cards
+		D3DDEVTYPE_HAL,				// HAL = Hardware Abstraction Layer - a "thin" software layer to allow application to directly interact with video card hardware
 		hWnd,
 		D3DCREATE_SOFTWARE_VERTEXPROCESSING,
 		&d3dpp,
@@ -100,51 +128,42 @@ void InitDirectX(HWND hWnd)
 
 	if (d3ddv == NULL)
 	{
-		OutputDebugString(L"[ERROR] CreateDevice failed\n");
+		DebugOut(L"[ERROR] CreateDevice failed\n %s %d", __FILE__, __LINE__);
 		return;
 	}
 
 	d3ddv->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backBuffer);
 
-	// Initialize sprite helper from Direct3DX helper library
+	// Initialize Direct3DX helper library
 	D3DXCreateSprite(d3ddv, &spriteHandler);
 
-	OutputDebugString(L"[INFO] InitGame is done\n");
-
+	DebugOut(L"[INFO] InitDirectX OK\n");
 }
 
 /*
-	Load all game resources. In this example, only load brick image
+	Load game resources. In this example, we only load a brick image
 */
 void LoadResources()
 {
-	D3DXIMAGE_INFO info;
-	HRESULT result = D3DXGetImageInfoFromFile(BRICK_TEXTURE_PATH, &info);
-	if (result != D3D_OK)
-	{
-		DebugOut(L"[ERROR] GetImageInfoFromFile failed: %s\n", BRICK_TEXTURE_PATH);
-		return;
-	}
-
-	result = D3DXCreateTextureFromFileEx(
+	HRESULT result = D3DXCreateTextureFromFileEx(
 		d3ddv,								// Pointer to Direct3D device object
 		BRICK_TEXTURE_PATH,					// Path to the image to load
-		info.Width,							// Texture width
-		info.Height,						// Texture height
+		D3DX_DEFAULT_NONPOW2, 				// Auto texture width (get from file)
+		D3DX_DEFAULT_NONPOW2, 				// Auto texture height (get from file)
 		1,
 		D3DUSAGE_DYNAMIC,
 		D3DFMT_UNKNOWN,
 		D3DPOOL_DEFAULT,
 		D3DX_DEFAULT,
 		D3DX_DEFAULT,
-		D3DCOLOR_XRGB(255, 255, 255),			// Transparent color
-		&info,
+		D3DCOLOR_XRGB(255, 255, 255),		// Transparent color
 		NULL,
-		&texBrick);								// Created texture pointer
+		NULL,
+		&texBrick);								
 
 	if (result != D3D_OK)
 	{
-		OutputDebugString(L"[ERROR] CreateTextureFromFile failed\n");
+		DebugOut(L"[ERROR] CreateTextureFromFileEx %s failed\n", BRICK_TEXTURE_PATH);
 		return;
 	}
 
@@ -152,33 +171,34 @@ void LoadResources()
 }
 
 /*
-	Update world status for this frame
+	Update world status 
 	dt: time period between beginning of last frame and beginning of this frame
+
+	IMPORTANT: no render-related code should be used inside this function. 
 */
 void Update(DWORD dt)
 {
-	//brick_x++;
-
-	brick_x = brick_x + brick_vx*dt; 
-	if ( (brick_x > (SCREEN_WIDTH - 32)) || brick_x < 0) brick_vx = -brick_vx;
+	brick_x += brick_vx*dt; 
+	if (brick_x <= 0 || brick_x >= SCREEN_WIDTH) brick_vx = -brick_vx;
 }
 
 /*
-Render a frame
+	Render a frame
+	IMPORTANT: world status must NOT be changed during rendering 
 */
 void Render()
 {
 	if (d3ddv->BeginScene())
 	{
-		// Clear screen (back buffer) with a color
+		// Clear the whole window with a color
 		d3ddv->ColorFill(backBuffer, NULL, BACKGROUND_COLOR);
 
 		spriteHandler->Begin(D3DXSPRITE_ALPHABLEND);
 
-		D3DXVECTOR3 p(brick_x,100.0f, 0);
+		D3DXVECTOR3 p(brick_x, brick_y, 0);
+		spriteHandler->Draw(texBrick, NULL, NULL, &p, D3DCOLOR_WHITE);
 
-		//D3DXVECTOR3 p(100.0f,10.0f, 0);
-		spriteHandler->Draw(texBrick, NULL, NULL, &p, D3DCOLOR_XRGB(255, 255, 255));
+		DebugOutTitle(L"%s (%0.1f,%0.1f) v:%0.1f", WINDOW_TITLE, brick_x, brick_y, brick_vx);
 
 		spriteHandler->End();
 		d3ddv->EndScene();
@@ -199,7 +219,7 @@ HWND CreateGameWindow(HINSTANCE hInstance, int nCmdShow, int ScreenWidth, int Sc
 	wc.lpfnWndProc = (WNDPROC)WinProc;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
-	wc.hIcon = NULL;
+	wc.hIcon = (HICON)LoadImage(hInstance, WINDOW_ICON_PATH, IMAGE_ICON, 0,0, LR_LOADFROMFILE);;
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
 	wc.lpszMenuName = NULL;
@@ -211,7 +231,7 @@ HWND CreateGameWindow(HINSTANCE hInstance, int nCmdShow, int ScreenWidth, int Sc
 	HWND hWnd =
 		CreateWindow(
 			WINDOW_CLASS_NAME,
-			MAIN_WINDOW_TITLE,
+			WINDOW_TITLE,
 			WS_OVERLAPPEDWINDOW, // WS_EX_TOPMOST | WS_VISIBLE | WS_POPUP,
 			CW_USEDEFAULT,
 			CW_USEDEFAULT,
@@ -224,9 +244,9 @@ HWND CreateGameWindow(HINSTANCE hInstance, int nCmdShow, int ScreenWidth, int Sc
 
 	if (!hWnd)
 	{
-		OutputDebugString(L"[ERROR] CreateWindow failed");
 		DWORD ErrCode = GetLastError();
-		return FALSE;
+		DebugOut(L"[ERROR] CreateWindow failed! ErrCode = %d\n", ErrCode);
+		return 0;
 	}
 
 	ShowWindow(hWnd, nCmdShow);
@@ -271,13 +291,27 @@ int Run()
 	return 1;
 }
 
+void Cleanup()
+{
+	texBrick->Release();
+	spriteHandler->Release();
+	backBuffer->Release();
+	d3ddv->Release();
+	d3d->Release();
+
+	DebugOut(L"[INFO] Cleanup Ok\n");
+}
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	HWND hWnd = CreateGameWindow(hInstance, nCmdShow, SCREEN_WIDTH, SCREEN_HEIGHT);
+	hWnd = CreateGameWindow(hInstance, nCmdShow, SCREEN_WIDTH, SCREEN_HEIGHT);
+	if (hWnd == 0) return 0; 
+
 	InitDirectX(hWnd);
 
 	LoadResources();
 	Run();
+	Cleanup();
 
 	return 0;
 }
