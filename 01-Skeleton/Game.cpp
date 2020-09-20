@@ -24,11 +24,16 @@ void CGame::Init(HWND hWnd)
 	d3dpp.BackBufferFormat = D3DFMT_X8R8G8B8;
 	d3dpp.BackBufferCount = 1;
 
+
+	// retrieve WindowClient width & height to set back buffer width & height accordingly
 	RECT r;
-	GetClientRect(hWnd, &r);	// retrieve Window width & height 
+	GetClientRect(hWnd, &r);	
 
 	d3dpp.BackBufferHeight = r.bottom + 1;
 	d3dpp.BackBufferWidth = r.right + 1;
+
+	backBufferWidth = d3dpp.BackBufferWidth;
+	backBufferHeight = d3dpp.BackBufferHeight;
 
 	d3d->CreateDevice(
 		D3DADAPTER_DEFAULT,
@@ -40,7 +45,7 @@ void CGame::Init(HWND hWnd)
 
 	if (d3ddv == NULL)
 	{
-		OutputDebugString(L"[ERROR] CreateDevice failed\n");
+		DebugOut(L"[ERROR] CreateDevice failed\n");
 		return;
 	}
 
@@ -49,7 +54,7 @@ void CGame::Init(HWND hWnd)
 	// Initialize sprite helper from Direct3DX helper library
 	D3DXCreateSprite(d3ddv, &spriteHandler);
 
-	OutputDebugString(L"[INFO] InitGame done;\n");
+	DebugOut(L"[INFO] InitGame done;\n");
 }
 
 /*
@@ -76,27 +81,19 @@ void CGame::Draw(float x, float y, LPDIRECT3DTEXTURE9 texture, int left, int top
 }
 
 /*
-	Utility function to load texture 
+	Utility function to wrap D3DXCreateTextureFromFileEx
 */
 LPDIRECT3DTEXTURE9 CGame::LoadTexture(LPCWSTR texturePath)
 {
-	D3DXIMAGE_INFO info;
 	LPDIRECT3DTEXTURE9 texture; 
-
-	HRESULT result = D3DXGetImageInfoFromFile(texturePath, &info);
-	if (result != D3D_OK)
-	{
-		DebugOut(L"[ERROR] GetImageInfoFromFile failed: %s\n", texturePath);
-		return NULL;
-	}
 
 	LPDIRECT3DDEVICE9 d3ddv = CGame::GetInstance()->GetDirect3DDevice();
 
-	result = D3DXCreateTextureFromFileEx(
+	HRESULT result = D3DXCreateTextureFromFileEx(
 		d3ddv,								// Pointer to Direct3D device object
 		texturePath,						// Path to the image to load
-		info.Width,							// Texture width
-		info.Height,						// Texture height
+		D3DX_DEFAULT_NONPOW2,				// Texture width
+		D3DX_DEFAULT_NONPOW2,				// Texture height
 		1,
 		D3DUSAGE_DYNAMIC,
 		D3DFMT_UNKNOWN,
@@ -104,7 +101,7 @@ LPDIRECT3DTEXTURE9 CGame::LoadTexture(LPCWSTR texturePath)
 		D3DX_DEFAULT,
 		D3DX_DEFAULT,
 		D3DCOLOR_XRGB(255, 255, 255),			// Transparent color
-		&info,
+		NULL,
 		NULL,
 		&texture);								// Created texture pointer
 
@@ -114,7 +111,7 @@ LPDIRECT3DTEXTURE9 CGame::LoadTexture(LPCWSTR texturePath)
 		return NULL;
 	}
 
-	DebugOut(L"[INFO] Texture loaded Ok: %s \n", texturePath);
+	DebugOut(L"[INFO] Texture loaded Ok from file: %s \n", texturePath);
 	return texture;
 }
 
@@ -125,7 +122,6 @@ CGame::~CGame()
 	if (d3ddv != NULL) d3ddv->Release();
 	if (d3d != NULL) d3d->Release();
 }
-
 
 CGame *CGame::GetInstance()
 {

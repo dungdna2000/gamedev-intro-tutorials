@@ -3,6 +3,10 @@
 #include <d3d9.h>
 #include <d3dx9.h>
 
+
+#define MAX_FRAME_RATE 60
+
+
 class CGame
 {
 	static CGame * __instance;
@@ -14,6 +18,9 @@ class CGame
 	LPDIRECT3DSURFACE9 backBuffer = NULL;		
 	LPD3DXSPRITE spriteHandler = NULL;			// Sprite helper library to help us draw 2D image on the screen 
 
+	int backBufferWidth = 0;
+	int backBufferHeight = 0;
+
 public:
 	void Init(HWND hWnd);
 	void Draw(float x, float y, LPDIRECT3DTEXTURE9 texture);
@@ -23,6 +30,8 @@ public:
 	LPDIRECT3DDEVICE9 GetDirect3DDevice() { return this->d3ddv; }
 	LPDIRECT3DSURFACE9 GetBackBuffer() { return backBuffer; }
 	LPD3DXSPRITE GetSpriteHandler() { return this->spriteHandler; }
+	int GetBackBufferWidth() { return backBufferWidth; }
+	int GetBackBufferHeight() { return backBufferHeight; }
 
 	static CGame * GetInstance();
 

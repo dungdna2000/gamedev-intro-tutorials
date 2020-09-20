@@ -16,11 +16,13 @@
 
 #include "debug.h"
 #include "Game.h"
-#include "GameObject.h"
 #include "Textures.h"
+#include "Mario.h"
+
 
 #define WINDOW_CLASS_NAME L"SampleWindow"
 #define MAIN_WINDOW_TITLE L"02 - Sprite animation"
+#define WINDOW_ICON_PATH L"mario.ico"
 
 #define BACKGROUND_COLOR D3DCOLOR_XRGB(200, 200, 255)
 #define SCREEN_WIDTH 320
@@ -32,10 +34,10 @@
 #define ID_TEX_ENEMY 10
 #define ID_TEX_MISC 20
 
-
-
-CGame *game;
-CGameObject *mario;
+CMario *mario;
+#define MARIO_START_X 10.0f
+#define MARIO_START_Y 130.0f
+#define MARIO_START_VX 0.1f
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -108,8 +110,7 @@ void LoadResources()
 	animations->Add(510, ani);
 	*/
 	
-	mario = new CGameObject();
-	mario->SetPosition(10.0f, 100.0f);
+	mario = new CMario(MARIO_START_X, MARIO_START_Y, MARIO_START_VX);
 }
 
 /*
@@ -126,6 +127,7 @@ void Update(DWORD dt)
 */
 void Render()
 {
+	CGame * game = CGame::GetInstance();
 	LPDIRECT3DDEVICE9 d3ddv = game->GetDirect3DDevice();
 	LPDIRECT3DSURFACE9 bb = game->GetBackBuffer();
 	LPD3DXSPRITE spriteHandler = game->GetSpriteHandler();
@@ -138,6 +140,8 @@ void Render()
 		spriteHandler->Begin(D3DXSPRITE_ALPHABLEND);
 
 		mario->Render();
+
+		DebugOutTitle(L"01 - Sprite %0.1f %0.1f", mario->GetX(), mario->GetY());
 
 		//
 		// TEST SPRITE DRAW
@@ -174,7 +178,7 @@ HWND CreateGameWindow(HINSTANCE hInstance, int nCmdShow, int ScreenWidth, int Sc
 	wc.lpfnWndProc = (WNDPROC)WinProc;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
-	wc.hIcon = NULL;
+	wc.hIcon = (HICON)LoadImage(hInstance, WINDOW_ICON_PATH, IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
 	wc.lpszMenuName = NULL;
@@ -197,15 +201,17 @@ HWND CreateGameWindow(HINSTANCE hInstance, int nCmdShow, int ScreenWidth, int Sc
 			hInstance,
 			NULL);
 
-	if (!hWnd) 
+	if (!hWnd)
 	{
-		OutputDebugString(L"[ERROR] CreateWindow failed");
 		DWORD ErrCode = GetLastError();
-		return FALSE;
+		DebugOut(L"[ERROR] CreateWindow failed! ErrCode: %d\nAt: %s %d \n", ErrCode, _W(__FILE__), __LINE__);
+		return 0;
 	}
 
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
+
+	SetDebugWindow(hWnd);
 
 	return hWnd;
 }
@@ -250,7 +256,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 {
 	HWND hWnd = CreateGameWindow(hInstance, nCmdShow, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-	game = CGame::GetInstance();
+	CGame *game = CGame::GetInstance();
 	game->Init(hWnd);
 
 	LoadResources();

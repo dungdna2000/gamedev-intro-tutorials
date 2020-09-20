@@ -24,11 +24,15 @@ void CGame::Init(HWND hWnd)
 	d3dpp.BackBufferFormat = D3DFMT_X8R8G8B8;
 	d3dpp.BackBufferCount = 1;
 
+	// retrieve WindowClient width & height to set back buffer width & height accordingly
 	RECT r;
-	GetClientRect(hWnd, &r);	// retrieve Window width & height 
+	GetClientRect(hWnd, &r);
 
 	d3dpp.BackBufferHeight = r.bottom + 1;
 	d3dpp.BackBufferWidth = r.right + 1;
+
+	backBufferWidth = d3dpp.BackBufferWidth;
+	backBufferHeight = d3dpp.BackBufferHeight;
 
 	d3d->CreateDevice(
 		D3DADAPTER_DEFAULT,
@@ -40,7 +44,7 @@ void CGame::Init(HWND hWnd)
 
 	if (d3ddv == NULL)
 	{
-		OutputDebugString(L"[ERROR] CreateDevice failed\n");
+		DebugOut(L"[ERROR] CreateDevice failed\n");
 		return;
 	}
 
@@ -49,7 +53,7 @@ void CGame::Init(HWND hWnd)
 	// Initialize sprite helper from Direct3DX helper library
 	D3DXCreateSprite(d3ddv, &spriteHandler);
 
-	OutputDebugString(L"[INFO] InitGame done;\n");
+	DebugOut(L"[INFO] InitGame done;\n");
 }
 
 /*
