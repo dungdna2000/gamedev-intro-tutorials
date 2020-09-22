@@ -37,7 +37,7 @@
 
 #define MARIO_UNTOUCHABLE_TIME 5000
 
-
+#define DEBUGGING_COLLISION false
 class CMario : public CGameObject
 {
 	int level;

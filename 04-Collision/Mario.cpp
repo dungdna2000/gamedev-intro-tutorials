@@ -12,7 +12,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	CGameObject::Update(dt);
 
 	// Simple fall down
+#if DEBUGGING_COLLISION
+	vx = vy = 0;
+#else
 	vy += MARIO_GRAVITY*dt;
+#endif
 
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
@@ -42,9 +46,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny);
 
+		if (coEventsResult.size() == 0) return;
+
 		// block 
-		x += min_tx*dx + nx*0.4f;		// nx*0.4f : need to push out a bit to avoid overlapping next frame
-		y += min_ty*dy + ny*0.4f;
+		x += min_tx*dx;		// nx*0.4f : need to push out a bit to avoid overlapping next frame // NOTE: no need anymore
+		y += min_ty*dy;     
 		
 		if (nx!=0) vx = 0;
 		if (ny!=0) vy = 0;
