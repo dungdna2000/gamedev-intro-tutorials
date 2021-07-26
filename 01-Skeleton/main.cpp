@@ -12,8 +12,8 @@
 ================================================================ */
 
 #include <windows.h>
-#include <d3d9.h>
-#include <d3dx9.h>
+#include <d3d10.h>
+#include <d3dx10.h>
 #include <vector>
 
 #include "debug.h"
@@ -43,8 +43,8 @@ CGameObject *brick;
 #define BRICK_X 10.0f
 #define BRICK_Y 100.0f
 
-LPDIRECT3DTEXTURE9 texMario = NULL;
-LPDIRECT3DTEXTURE9 texBrick = NULL;
+ID3D10Texture2D *texMario = NULL;
+ID3D10Texture2D *texBrick = NULL;
 
 //vector<LPGAMEOBJECT> objects;  
 
@@ -72,6 +72,17 @@ void LoadResources()
 
 	mario = new CMario(MARIO_START_X, MARIO_START_Y, MARIO_START_VX, texMario);
 	brick = new CGameObject(BRICK_X, BRICK_Y, texBrick);
+	
+	// objects.push_back(mario);
+	// for(i)		 
+	//		objects.push_back(new CGameObject(BRICK_X+i*BRICK_WIDTH,....);
+	//
+
+	//
+	// int x = BRICK_X;
+	// for(i)
+	//		... new CGameObject(x,.... 
+	//		x+=BRICK_WIDTH;
 }
 
 /*
@@ -96,29 +107,32 @@ void Update(DWORD dt)
 */
 void Render()
 {
-	CGame * game = CGame::GetInstance();
-	LPDIRECT3DDEVICE9 d3ddv = game->GetDirect3DDevice();
-	LPDIRECT3DSURFACE9 bb = game->GetBackBuffer();
-	LPD3DXSPRITE spriteHandler = game->GetSpriteHandler();
+	CGame* g = CGame::GetInstance();
 
-	if (d3ddv->BeginScene())
+	ID3D10Device* pD3DDevice = g->GetDirect3DDevice();
+	IDXGISwapChain* pSwapChain = g->GetSwapChain();
+	ID3D10RenderTargetView* pRenderTargetView = g->GetRenderTargetView();
+	ID3DX10Sprite* spriteHandler = g->GetSpriteHandler();
+
+	if (pD3DDevice != NULL)
 	{
-		// Clear back buffer with a color
-		d3ddv->ColorFill(bb, NULL, BACKGROUND_COLOR);
+		// clear the target buffer
+		pD3DDevice->ClearRenderTargetView(pRenderTargetView, D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f));
 
-		spriteHandler->Begin(D3DXSPRITE_ALPHABLEND);
+		// start drawing the sprites
+		spriteHandler->Begin(D3DX10_SPRITE_SORT_TEXTURE);
 
-
-		mario->Render();
 		brick->Render();
+		mario->Render();
 
-
+		// Finish up and send the sprites to the hardware
 		spriteHandler->End();
-		d3ddv->EndScene();
-	}
 
-	// Display back buffer content to the screen
-	d3ddv->Present(NULL, NULL, NULL, NULL);
+		//DebugOutTitle((wchar_t*)L"%s (%0.1f,%0.1f) v:%0.1f", WINDOW_TITLE, brick_x, brick_y, brick_vx);
+
+		// display the next item in the swap chain
+		pSwapChain->Present(0, 0);
+	}
 }
 
 HWND CreateGameWindow(HINSTANCE hInstance, int nCmdShow, int ScreenWidth, int ScreenHeight)
@@ -174,8 +188,8 @@ int Run()
 {
 	MSG msg;
 	int done = 0;
-	DWORD frameStart = GetTickCount();
-	DWORD tickPerFrame = 1000 / MAX_FRAME_RATE;
+	ULONGLONG frameStart = GetTickCount64();
+	ULONGLONG tickPerFrame = 1000 / MAX_FRAME_RATE;
 
 	while (!done)
 	{
@@ -187,26 +201,31 @@ int Run()
 			DispatchMessage(&msg);
 		}
 
-		DWORD now = GetTickCount();
+		ULONGLONG now = GetTickCount64();
 
 		// dt: the time between (beginning of last frame) and now
 		// this frame: the frame we are about to render
-		DWORD dt = now - frameStart;
+		ULONGLONG dt = now - frameStart;
 
 		if (dt >= tickPerFrame)
 		{
 			frameStart = now;
-			Update(dt);
+			Update((DWORD)dt);
 			Render();
 		}
 		else
-			Sleep(tickPerFrame - dt);	
+			Sleep((DWORD)(tickPerFrame - dt));
 	}
 
 	return 1;
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+int WINAPI WinMain(
+	_In_ HINSTANCE hInstance,
+	_In_ HINSTANCE hPrevInstance,
+	_In_ LPSTR lpCmdLine,
+	_In_ int nCmdShow
+) 
 {
 	HWND hWnd = CreateGameWindow(hInstance, nCmdShow, SCREEN_WIDTH, SCREEN_HEIGHT);
 

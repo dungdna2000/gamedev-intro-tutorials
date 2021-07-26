@@ -5,9 +5,9 @@
 #include "GameObject.h"
 
 /*
-	Initialize game object and load a texture
+	Initialize game object 
 */
-CGameObject::CGameObject(float x, float y, LPDIRECT3DTEXTURE9 tex)
+CGameObject::CGameObject(float x, float y, ID3D10Texture2D* tex)
 {
 	this->x = x;
 	this->y = y;

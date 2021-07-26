@@ -1,4 +1,8 @@
 #pragma once
+/*
+	Debug utilities
+*/
+
 
 #include <windows.h>
 #include <signal.h>
@@ -18,6 +22,19 @@
 		va_end(argp);				\
 }
 
+//
+// Print formatted string (similar to printf) to debug console
+//
 void DebugOut(wchar_t *fmt, ...);
+
+//
+// Print formatted string (similar to printf) to a target window
+// This function is very useful to view live value of variables
+// To set target window, use SetDebugWindow
+//
 void DebugOutTitle(wchar_t *fmt, ...);
+
+//
+// Set target window for DebugOutTitle
+//
 void SetDebugWindow(HWND hwnd);

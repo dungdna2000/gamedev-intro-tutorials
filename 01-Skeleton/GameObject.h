@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Windows.h>
-#include <d3dx9.h>
+#include <d3dx10.h>
 
 class CGameObject
 {
@@ -11,13 +11,13 @@ protected:
 
 	// This should be a pointer to an object containing all graphic/sound/audio assets for rendering this object. 
 	// For now, just a pointer to a single texture
-	LPDIRECT3DTEXTURE9 texture;			
+	ID3D10Texture2D * texture;			
 public: 
 	void SetPosition(float x, float y) { this->x = x, this->y = y; }
 	float GetX() { return x; }
 	float GetY() { return y; }
 
-	CGameObject(float x = 0.0f, float y=0.0f, LPDIRECT3DTEXTURE9 texture = NULL);
+	CGameObject(float x = 0.0f, float y=0.0f, ID3D10Texture2D* texture = NULL);
 
 	virtual void Update(DWORD dt) { } ;
 	virtual void Render();
@@ -29,10 +29,12 @@ typedef CGameObject * LPGAMEOBJECT;
 class CMario : public CGameObject
 {
 	float vx;
+	//float vy;
 public: 
-	CMario(float x, float y, float vx, LPDIRECT3DTEXTURE9 texture) :CGameObject(x, y, texture) 
+	CMario(float x, float y, float vx, /*float vy,*/ ID3D10Texture2D* texture) :CGameObject(x, y, texture)
 	{
 		this->vx = vx;
+		//this->vy = vy;
 	};
 	void Update(DWORD dt);
 };

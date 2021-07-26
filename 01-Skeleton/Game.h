@@ -1,35 +1,42 @@
 #pragma once
 #include <Windows.h>
-#include <d3d9.h>
-#include <d3dx9.h>
+#include <d3d10.h>
+#include <d3dx10.h>
 
 
 #define MAX_FRAME_RATE 60
 
-
+/*
+	The game framework!
+*/
 class CGame
 {
 	static CGame * __instance;
 	HWND hWnd;									// Window handle
 
-	LPDIRECT3D9 d3d = NULL;						// Direct3D handle
-	LPDIRECT3DDEVICE9 d3ddv = NULL;				// Direct3D device object
-
-	LPDIRECT3DSURFACE9 backBuffer = NULL;		
-	LPD3DXSPRITE spriteHandler = NULL;			// Sprite helper library to help us draw 2D image on the screen 
-
-	int backBufferWidth = 0;
+	int backBufferWidth = 0;					// Backbuffer width & height, will be set during Direct3D initialization
 	int backBufferHeight = 0;
 
-public:
-	void Init(HWND hWnd);
-	void Draw(float x, float y, LPDIRECT3DTEXTURE9 texture);
-	void Draw(float x, float y, LPDIRECT3DTEXTURE9 texture, int left, int top, int right, int bottom);
-	LPDIRECT3DTEXTURE9 LoadTexture(LPCWSTR texturePath);
+	ID3D10Device* pD3DDevice = NULL;
+	IDXGISwapChain* pSwapChain = NULL;
+	ID3D10RenderTargetView* pRenderTargetView = NULL;
 
-	LPDIRECT3DDEVICE9 GetDirect3DDevice() { return this->d3ddv; }
-	LPDIRECT3DSURFACE9 GetBackBuffer() { return backBuffer; }
-	LPD3DXSPRITE GetSpriteHandler() { return this->spriteHandler; }
+	ID3DX10Sprite* spriteObject = NULL;				// Sprite handling object 
+
+public:
+	// Init DirectX, Sprite Handler
+	void Init(HWND hWnd);
+
+	// Draw a full image at position (x,y) on the screen
+	void Draw(float x, float y, ID3D10Texture2D * texture);
+
+	ID3D10Texture2D * LoadTexture(LPCWSTR texturePath);
+
+	ID3D10Device * GetDirect3DDevice() { return this->pD3DDevice; }
+	IDXGISwapChain* GetSwapChain() { return this->pSwapChain; }
+	ID3D10RenderTargetView* GetRenderTargetView() { return this->pRenderTargetView;  }
+	ID3DX10Sprite* GetSpriteHandler() { return this->spriteObject; }
+
 	int GetBackBufferWidth() { return backBufferWidth; }
 	int GetBackBufferHeight() { return backBufferHeight; }
 
