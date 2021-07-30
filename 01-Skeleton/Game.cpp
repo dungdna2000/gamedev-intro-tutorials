@@ -111,57 +111,55 @@ void CGame::Init(HWND hWnd)
 	DebugOut((wchar_t*)L"[INFO] InitDirectX has been successful\n");
 
 	return;
-
 }
 
 /*
 	Draw the whole texture onto screen. This function will be obsoleted in later samples because it is very inefficient to convert 
 	from texture to sprite every time we need to draw it
 */
-void CGame::Draw(float x, float y, ID3D10Texture2D * texture)
+void CGame::Draw(float x, float y, LPTEXTURE tex, RECT* rect)
 {
+	if (tex == NULL) return; 
+
+	int spriteWidth = 0;
+	int spriteHeight = 0;
+
 	D3DX10_SPRITE sprite;
 
-	//
-	//  Convert texture to a D3DX10_SPRITE to draw
-	//
-
-	// Get the texture details
-	D3D10_TEXTURE2D_DESC desc;
-	texture->GetDesc(&desc);
-
-	// Create a shader resource view of the texture
-	D3D10_SHADER_RESOURCE_VIEW_DESC SRVDesc;
-
-	// Clear out the shader resource view description structure
-	ZeroMemory(&SRVDesc, sizeof(SRVDesc));
-
-	// Set the texture format
-	SRVDesc.Format = desc.Format;
-	// Set the type of resource
-	SRVDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
-	SRVDesc.Texture2D.MipLevels = desc.MipLevels;
-
-	ID3D10ShaderResourceView* gSpriteTextureRV = NULL;
-
-	pD3DDevice->CreateShaderResourceView(texture, &SRVDesc, &gSpriteTextureRV);
-
 	// Set the sprite’s shader resource view
-	sprite.pTexture = gSpriteTextureRV;
+	sprite.pTexture = tex->getShaderResourceView();
 
-	// top-left location in U,V coords
-	sprite.TexCoord.x = 0;
-	sprite.TexCoord.y = 0;
+	if (rect==NULL) 
+	{
+		// top-left location in U,V coords
+		sprite.TexCoord.x = 0;
+		sprite.TexCoord.y = 0;
 
-	// Determine the texture size in U,V coords
-	sprite.TexSize.x = 1.0f;
-	sprite.TexSize.y = 1.0f;
+		// Determine the texture size in U,V coords
+		sprite.TexSize.x = 1.0f;
+		sprite.TexSize.y = 1.0f;
+
+		spriteWidth = tex->getWidth();
+		spriteHeight = tex->getHeight();
+	}
+	else
+	{
+		sprite.TexCoord.x = rect->left / (float)tex->getWidth();
+		sprite.TexCoord.y = rect->top / (float)tex->getHeight();
+
+		spriteWidth = (rect->right - rect->left + 1);
+		spriteHeight = (rect->bottom - rect->top + 1);
+
+		sprite.TexSize.x = spriteWidth / (float)tex->getWidth();
+		sprite.TexSize.y = spriteHeight / (float)tex->getHeight();
+	}
 
 	// Set the texture index. Single textures will use 0
 	sprite.TextureIndex = 0;
 
 	// The color to apply to this sprite, full color applies white.
 	sprite.ColorModulate = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+
 
 	//
 	// Build the rendering matrix based on sprite location 
@@ -175,14 +173,12 @@ void CGame::Draw(float x, float y, ID3D10Texture2D * texture)
 
 	// Scale the sprite to its correct width and height because by default, DirectX draws it with width = height = 1.0f 
 	D3DXMATRIX matScaling;
-	D3DXMatrixScaling(&matScaling, (FLOAT)desc.Width , (FLOAT)desc.Height, 1.0f);
+	D3DXMatrixScaling(&matScaling, (FLOAT)spriteWidth, (FLOAT)spriteHeight , 1.0f);
 
 	// Setting the sprite’s position and size
 	sprite.matWorld = (matScaling * matTranslation);
 
 	spriteObject->DrawSpritesImmediate(&sprite, 1, 0, 0);
-
-	gSpriteTextureRV->Release();
 }
 
 /*
@@ -202,7 +198,7 @@ void CGame::Draw(float x, float y, ID3D10Texture2D * texture)
 /*
 	Utility function to wrap D3DXCreateTextureFromFileEx
 */
-ID3D10Texture2D * CGame::LoadTexture(LPCWSTR texturePath)
+LPTEXTURE CGame::LoadTexture(LPCWSTR texturePath)
 {
 	ID3D10Resource* pD3D10Resource = NULL;
 	ID3D10Texture2D* tex = NULL;
@@ -210,7 +206,7 @@ ID3D10Texture2D * CGame::LoadTexture(LPCWSTR texturePath)
 	// Loads the texture into a temporary ID3D10Resource object
 	HRESULT hr = D3DX10CreateTextureFromFile(pD3DDevice,
 		texturePath,
-		NULL,
+		NULL, //&info,
 		NULL,
 		&pD3D10Resource,
 		NULL);
@@ -218,7 +214,7 @@ ID3D10Texture2D * CGame::LoadTexture(LPCWSTR texturePath)
 	// Make sure the texture was loaded successfully
 	if (FAILED(hr))
 	{
-		DebugOut((wchar_t*)L"[ERROR] Failed to load texture file: %s \n", texturePath);
+		DebugOut((wchar_t*)L"[ERROR] Failed to load texture file: %s with error: %d\n", texturePath, hr);
 		return NULL;
 	}
 
@@ -231,8 +227,33 @@ ID3D10Texture2D * CGame::LoadTexture(LPCWSTR texturePath)
 		return NULL;
 	}
 
+	//
+	// Create the Share Resource View for this texture 
+	// 	   
+	// Get the texture details
+	D3D10_TEXTURE2D_DESC desc;
+	tex->GetDesc(&desc);
+
+	// Create a shader resource view of the texture
+	D3D10_SHADER_RESOURCE_VIEW_DESC SRVDesc;
+
+	// Clear out the shader resource view description structure
+	ZeroMemory(&SRVDesc, sizeof(SRVDesc));
+
+	// Set the texture format
+	SRVDesc.Format = desc.Format;
+
+	// Set the type of resource
+	SRVDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
+	SRVDesc.Texture2D.MipLevels = desc.MipLevels;
+
+	ID3D10ShaderResourceView* gSpriteTextureRV = NULL;
+
+	pD3DDevice->CreateShaderResourceView(tex, &SRVDesc, &gSpriteTextureRV);
+
 	DebugOut(L"[INFO] Texture loaded Ok from file: %s \n", texturePath);
-	return tex;
+
+	return new CTexture(tex, gSpriteTextureRV);
 }
 
 CGame::~CGame()

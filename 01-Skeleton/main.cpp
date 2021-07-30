@@ -6,9 +6,11 @@
 	This sample illustrates how to:
 
 	1/ Re-organize introductory code to an initial skeleton for better scalability
-	2/ Render transparent sprites
-	3/ CGame is a singleton, playing a role of an "engine".
-	4/ CGameObject is an abstract class for all game objects
+	2/ CGame is a singleton, playing a role of an "engine".
+	3/ CGameObject is an abstract class for all game objects
+	4/ CTexture is a wrapper class for ID3D10TEXTURE 
+	
+	NOTE: create transparent background, download GIMP, then use Color to Alpha feature 
 ================================================================ */
 
 #include <windows.h>
@@ -27,24 +29,29 @@
 #define BRICK_TEXTURE_PATH L"brick.png"
 #define MARIO_TEXTURE_PATH L"mario.png"
 
-#define BACKGROUND_COLOR D3DCOLOR_XRGB(0, 0, 0)
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
+#define MISC_TEXTURE_PATH L"misc.png"
+
+#define BACKGROUND_COLOR D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f)
+#define SCREEN_WIDTH 320
+#define SCREEN_HEIGHT 240
 
 
 using namespace std;
 
 CMario *mario;
 #define MARIO_START_X 10.0f
-#define MARIO_START_Y 130.0f
+#define MARIO_START_Y 100.0f
 #define MARIO_START_VX 0.1f
+#define MARIO_START_VY 0.1f
 
-CGameObject *brick;
+
+CBrick *brick;
 #define BRICK_X 10.0f
-#define BRICK_Y 100.0f
+#define BRICK_Y 120.0f
 
-ID3D10Texture2D *texMario = NULL;
-ID3D10Texture2D *texBrick = NULL;
+LPTEXTURE texMario = NULL;
+LPTEXTURE texBrick = NULL;
+LPTEXTURE texMisc = NULL;
 
 //vector<LPGAMEOBJECT> objects;  
 
@@ -70,8 +77,12 @@ void LoadResources()
 	texBrick = game->LoadTexture(BRICK_TEXTURE_PATH);
 	texMario = game->LoadTexture(MARIO_TEXTURE_PATH);
 
-	mario = new CMario(MARIO_START_X, MARIO_START_Y, MARIO_START_VX, texMario);
-	brick = new CGameObject(BRICK_X, BRICK_Y, texBrick);
+	// Load a sprite sheet as a texture to try drawing a portion of a texture. See function Render 
+	texMisc = game->LoadTexture(MISC_TEXTURE_PATH);
+
+	mario = new CMario(MARIO_START_X, MARIO_START_Y, MARIO_START_VX, MARIO_START_VY, texMario);
+	brick = new CBrick(BRICK_X, BRICK_Y, texBrick);
+
 	
 	// objects.push_back(mario);
 	// for(i)		 
@@ -116,21 +127,19 @@ void Render()
 
 	if (pD3DDevice != NULL)
 	{
-		// clear the target buffer
-		pD3DDevice->ClearRenderTargetView(pRenderTargetView, D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f));
+		// clear the background 
+		pD3DDevice->ClearRenderTargetView(pRenderTargetView, BACKGROUND_COLOR);
 
-		// start drawing the sprites
 		spriteHandler->Begin(D3DX10_SPRITE_SORT_TEXTURE);
 
 		brick->Render();
 		mario->Render();
 
-		// Finish up and send the sprites to the hardware
+		// Uncomment this line to see how to draw a porttion of a texture  
+		//g->Draw(10, 10, texMisc, 300, 117, 316, 133);
+
+
 		spriteHandler->End();
-
-		//DebugOutTitle((wchar_t*)L"%s (%0.1f,%0.1f) v:%0.1f", WINDOW_TITLE, brick_x, brick_y, brick_vx);
-
-		// display the next item in the swap chain
 		pSwapChain->Present(0, 0);
 	}
 }
@@ -231,6 +240,9 @@ int WINAPI WinMain(
 
 	CGame * game = CGame::GetInstance();
 	game->Init(hWnd);
+
+	SetWindowPos(hWnd, 0, 0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
+
 
 	LoadResources();
 

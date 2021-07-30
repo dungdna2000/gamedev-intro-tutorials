@@ -3,11 +3,12 @@
 #include <d3d10.h>
 #include <d3dx10.h>
 
+#include "Texture.h"
 
 #define MAX_FRAME_RATE 60
 
 /*
-	The game framework!
+	Our simple game framework 
 */
 class CGame
 {
@@ -27,10 +28,24 @@ public:
 	// Init DirectX, Sprite Handler
 	void Init(HWND hWnd);
 
-	// Draw a full image at position (x,y) on the screen
-	void Draw(float x, float y, ID3D10Texture2D * texture);
+	//
+	// Draw a portion or ALL the texture at position (x,y) on the screen
+	// rect : if NULL, the whole texture will be drawn
+	//        if NOT NULL, only draw that portion of the texture 
+	void Draw(float x, float y, LPTEXTURE tex, RECT *rect = NULL);
 
-	ID3D10Texture2D * LoadTexture(LPCWSTR texturePath);
+	void Draw(float x, float y, LPTEXTURE tex, int l, int t, int r, int b)
+	{
+		RECT rect; 
+		rect.left = l;
+		rect.top = t;
+		rect.right = r;
+		rect.bottom = b;
+		this->Draw(x, y, tex, &rect);
+	}
+
+	// Load a texture from a file 
+	LPTEXTURE LoadTexture(LPCWSTR texturePath);
 
 	ID3D10Device * GetDirect3DDevice() { return this->pD3DDevice; }
 	IDXGISwapChain* GetSwapChain() { return this->pSwapChain; }
