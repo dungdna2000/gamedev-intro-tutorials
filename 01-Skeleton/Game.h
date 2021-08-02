@@ -21,6 +21,7 @@ class CGame
 	ID3D10Device* pD3DDevice = NULL;
 	IDXGISwapChain* pSwapChain = NULL;
 	ID3D10RenderTargetView* pRenderTargetView = NULL;
+	ID3D10BlendState* pBlendStateAlpha = NULL;			// To store alpha blending state
 
 	ID3DX10Sprite* spriteObject = NULL;				// Sprite handling object 
 
@@ -44,13 +45,13 @@ public:
 		this->Draw(x, y, tex, &rect);
 	}
 
-	// Load a texture from a file 
 	LPTEXTURE LoadTexture(LPCWSTR texturePath);
 
 	ID3D10Device * GetDirect3DDevice() { return this->pD3DDevice; }
 	IDXGISwapChain* GetSwapChain() { return this->pSwapChain; }
 	ID3D10RenderTargetView* GetRenderTargetView() { return this->pRenderTargetView;  }
 	ID3DX10Sprite* GetSpriteHandler() { return this->spriteObject; }
+	ID3D10BlendState* GetAlphaBlending() { return pBlendStateAlpha; };
 
 	int GetBackBufferWidth() { return backBufferWidth; }
 	int GetBackBufferHeight() { return backBufferHeight; }

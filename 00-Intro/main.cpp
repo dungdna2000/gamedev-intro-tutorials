@@ -58,7 +58,7 @@ ID3D10RenderTargetView* pRenderTargetView = NULL;
 int BackBufferWidth = 0;
 int BackBufferHeight = 0;
 
-#define BRICK_TEXTURE_PATH L"brick.png"
+#define TEXTURE_PATH_BRICK L"brick.png"
 #define BRICK_START_X 8.0f
 #define BRICK_START_Y 200.0f
 
@@ -236,7 +236,7 @@ void LoadResources()
 
 	// Loads the texture into a temporary ID3D10Resource object
 	HRESULT hr = D3DX10CreateTextureFromFile(pD3DDevice,
-		BRICK_TEXTURE_PATH,
+		TEXTURE_PATH_BRICK,
 		NULL,
 		NULL,
 		&pD3D10Resource,
@@ -245,7 +245,7 @@ void LoadResources()
 	// Make sure the texture was loaded successfully
 	if (FAILED(hr))
 	{
-		DebugOut((wchar_t*)L"[ERROR] Failed to load texture file: %s \n", BRICK_TEXTURE_PATH);
+		DebugOut((wchar_t*)L"[ERROR] Failed to load texture file: %s \n", TEXTURE_PATH_BRICK);
 		return;
 	}
 
@@ -296,7 +296,7 @@ void LoadResources()
 	spriteBrick.ColorModulate = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
 
-	DebugOut((wchar_t*)L"[INFO] Texture loaded Ok: %s \n", BRICK_TEXTURE_PATH);
+	DebugOut((wchar_t*)L"[INFO] Texture loaded Ok: %s \n", TEXTURE_PATH_BRICK);
 }
 
 /*

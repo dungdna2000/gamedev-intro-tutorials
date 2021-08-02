@@ -6,7 +6,6 @@ CGame * CGame::__instance = NULL;
 /*
 	Initialize DirectX, create a Direct3D device for rendering within the window, initial Sprite library for 
 	rendering 2D images
-	- hInst: Application instance handle
 	- hWnd: Application window handle
 */
 void CGame::Init(HWND hWnd)
@@ -63,10 +62,7 @@ void CGame::Init(HWND hWnd)
 	// create the render target view
 	hr = pD3DDevice->CreateRenderTargetView(pBackBuffer, NULL, &pRenderTargetView);
 
-	// release the back buffer
 	pBackBuffer->Release();
-
-	// Make sure the render target view was created successfully
 	if (hr != S_OK)
 	{
 		DebugOut((wchar_t*)L"[ERROR] CreateRenderTargetView has failed %s %d", _W(__FILE__), __LINE__);
@@ -108,14 +104,29 @@ void CGame::Init(HWND hWnd)
 		10);
 	hr = spriteObject->SetProjectionTransform(&matProjection);
 
+
+	// Initialize the blend state for alpha drawing
+	D3D10_BLEND_DESC StateDesc;
+	ZeroMemory(&StateDesc, sizeof(D3D10_BLEND_DESC));
+	StateDesc.AlphaToCoverageEnable = FALSE;
+	StateDesc.BlendEnable[0] = TRUE;
+	StateDesc.SrcBlend = D3D10_BLEND_SRC_ALPHA;
+	StateDesc.DestBlend = D3D10_BLEND_INV_SRC_ALPHA;
+	StateDesc.BlendOp = D3D10_BLEND_OP_ADD;
+	StateDesc.SrcBlendAlpha = D3D10_BLEND_ZERO;
+	StateDesc.DestBlendAlpha = D3D10_BLEND_ZERO;
+	StateDesc.BlendOpAlpha = D3D10_BLEND_OP_ADD;
+	StateDesc.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
+	pD3DDevice->CreateBlendState(&StateDesc, &this->pBlendStateAlpha);
+
 	DebugOut((wchar_t*)L"[INFO] InitDirectX has been successful\n");
 
 	return;
 }
 
 /*
-	Draw the whole texture onto screen. This function will be obsoleted in later samples because it is very inefficient to convert 
-	from texture to sprite every time we need to draw it
+	Draw the whole texture or part of texture onto screen
+	NOTE: This function is OBSOLTED in this example. Use Sprite::Render instead 
 */
 void CGame::Draw(float x, float y, LPTEXTURE tex, RECT* rect)
 {
@@ -160,7 +171,6 @@ void CGame::Draw(float x, float y, LPTEXTURE tex, RECT* rect)
 	// The color to apply to this sprite, full color applies white.
 	sprite.ColorModulate = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
-
 	//
 	// Build the rendering matrix based on sprite location 
 	//
@@ -182,21 +192,7 @@ void CGame::Draw(float x, float y, LPTEXTURE tex, RECT* rect)
 }
 
 /*
-	Utility function to wrap LPD3DXSPRITE::Draw
-*/
-//void CGame::Draw(float x, float y, LPDIRECT3DTEXTURE9 texture, int left, int top, int right, int bottom)
-//{
-//	D3DXVECTOR3 p(x, y, 0);
-//	RECT r;
-//	r.left = left;
-//	r.top = top;
-//	r.right = right;
-//	r.bottom = bottom;
-//	spriteHandler->Draw(texture, &r, NULL, &p, D3DCOLOR_XRGB(255, 255, 255));
-//}
-
-/*
-	Utility function to wrap D3DXCreateTextureFromFileEx
+	Utility function to wrap D3DX10CreateTextureFromFileEx
 */
 LPTEXTURE CGame::LoadTexture(LPCWSTR texturePath)
 {

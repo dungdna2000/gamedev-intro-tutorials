@@ -10,7 +10,7 @@
 	3/ CGameObject is an abstract class for all game objects
 	4/ CTexture is a wrapper class for ID3D10TEXTURE 
 	
-	NOTE: create transparent background, download GIMP, then use Color to Alpha feature 
+	NOTE: to create transparent background, download GIMP, then use Color to Alpha feature 
 ================================================================ */
 
 #include <windows.h>
@@ -26,12 +26,12 @@
 #define MAIN_WINDOW_TITLE L"01 - Skeleton"
 #define WINDOW_ICON_PATH L"brick.ico"
 
-#define BRICK_TEXTURE_PATH L"brick.png"
-#define MARIO_TEXTURE_PATH L"mario.png"
+#define TEXTURE_PATH_BRICK L"brick.png"
+#define TEXTURE_PATH_MARIO L"mario.png"
 
-#define MISC_TEXTURE_PATH L"misc.png"
+#define TEXTURE_PATH_MISC L"misc.png"
 
-#define BACKGROUND_COLOR D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f)
+#define BACKGROUND_COLOR D3DXCOLOR(0.5f, 0.5f, 0.5f, 0.0f)
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
 
@@ -74,11 +74,12 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 void LoadResources()
 {
 	CGame * game = CGame::GetInstance();
-	texBrick = game->LoadTexture(BRICK_TEXTURE_PATH);
-	texMario = game->LoadTexture(MARIO_TEXTURE_PATH);
+	texBrick = game->LoadTexture(TEXTURE_PATH_BRICK);
+	texMario = game->LoadTexture(TEXTURE_PATH_MARIO);
+	texMisc = game->LoadTexture(TEXTURE_PATH_MISC);
 
 	// Load a sprite sheet as a texture to try drawing a portion of a texture. See function Render 
-	texMisc = game->LoadTexture(MISC_TEXTURE_PATH);
+	//texMisc = game->LoadTexture(MISC_TEXTURE_PATH);
 
 	mario = new CMario(MARIO_START_X, MARIO_START_Y, MARIO_START_VX, MARIO_START_VY, texMario);
 	brick = new CBrick(BRICK_X, BRICK_Y, texBrick);
@@ -132,12 +133,15 @@ void Render()
 
 		spriteHandler->Begin(D3DX10_SPRITE_SORT_TEXTURE);
 
+		// Use Alpha blending for transparent sprites
+		FLOAT NewBlendFactor[4] = { 0,0,0,0 };
+		pD3DDevice->OMSetBlendState(g->GetAlphaBlending(), NewBlendFactor, 0xffffffff);
+
 		brick->Render();
 		mario->Render();
 
 		// Uncomment this line to see how to draw a porttion of a texture  
-		//g->Draw(10, 10, texMisc, 300, 117, 316, 133);
-
+		g->Draw(10, 10, texMisc, 300, 117, 316, 133);
 
 		spriteHandler->End();
 		pSwapChain->Present(0, 0);
@@ -231,7 +235,7 @@ int Run()
 
 int WINAPI WinMain(
 	_In_ HINSTANCE hInstance,
-	_In_ HINSTANCE hPrevInstance,
+	_In_opt_ HINSTANCE hPrevInstance,
 	_In_ LPSTR lpCmdLine,
 	_In_ int nCmdShow
 ) 

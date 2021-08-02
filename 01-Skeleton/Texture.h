@@ -1,11 +1,7 @@
 #pragma once
 
-#include <Windows.h>
 #include <d3d10.h>
 #include <d3dx10.h>
-
-#include "debug.h"
-#include "Game.h"
 
 //
 // Warpper class to simplify texture manipulation. See also CGame::LoadTexture
@@ -44,10 +40,9 @@ public:
 
 	~CTexture()
 	{
-		this->_rsview->Release();
-		this->_tex->Release();
+		if (_rsview!=NULL) this->_rsview->Release();
+		if (_tex!=NULL) this->_tex->Release();
 	}
 };
 
 typedef CTexture* LPTEXTURE;
-
