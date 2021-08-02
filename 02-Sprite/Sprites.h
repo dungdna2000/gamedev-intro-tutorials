@@ -1,7 +1,10 @@
 #pragma once
 #include <Windows.h>
-#include <d3dx9.h>
 #include <unordered_map>
+
+#include <d3dx10.h>
+
+#include "Texture.h"
 
 using namespace std;
 
@@ -14,9 +17,11 @@ class CSprite
 	int right;
 	int bottom;
 
-	LPDIRECT3DTEXTURE9 texture;
+	LPTEXTURE texture;
+	D3DX10_SPRITE sprite;	
+	D3DXMATRIX matScaling;
 public: 
-	CSprite(int id, int left, int top, int right, int bottom, LPDIRECT3DTEXTURE9 tex);
+	CSprite(int id, int left, int top, int right, int bottom, LPTEXTURE tex);
 
 	void Draw(float x, float y);
 };
@@ -33,7 +38,7 @@ class CSprites
 	unordered_map<int, LPSPRITE> sprites;
 
 public:
-	void Add(int id, int left, int top, int right, int bottom, LPDIRECT3DTEXTURE9 tex);
+	void Add(int id, int left, int top, int right, int bottom, LPTEXTURE tex);
 	LPSPRITE Get(int id);
 
 	static CSprites * GetInstance();
@@ -57,7 +62,7 @@ typedef CAnimationFrame *LPANIMATION_FRAME;
 
 class CAnimation
 {
-	DWORD lastFrameTime;
+	ULONGLONG lastFrameTime;
 	int defaultTime;
 	int currentFrame;
 	vector<LPANIMATION_FRAME> frames;

@@ -2,7 +2,7 @@
 #include "Game.h"
 #include "debug.h"
 
-CSprite::CSprite(int id, int left, int top, int right, int bottom, LPDIRECT3DTEXTURE9 tex)
+CSprite::CSprite(int id, int left, int top, int right, int bottom, LPTEXTURE tex)
 {
 	this->id = id;
 	this->left = left;
@@ -10,6 +10,23 @@ CSprite::CSprite(int id, int left, int top, int right, int bottom, LPDIRECT3DTEX
 	this->right = right;
 	this->bottom = bottom;
 	this->texture = tex;
+
+	// Set the sprite’s shader resource view
+	sprite.pTexture = tex->getShaderResourceView();
+
+	sprite.TexCoord.x = this->left / (float)tex->getWidth();
+	sprite.TexCoord.y = this->top / (float)tex->getHeight();
+
+	int spriteWidth = (this->right - this->left + 1);
+	int spriteHeight = (this->bottom - this->top + 1);
+
+	sprite.TexSize.x = spriteWidth / (float)tex->getWidth();
+	sprite.TexSize.y = spriteHeight / (float)tex->getHeight();
+
+	sprite.ColorModulate = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	sprite.TextureIndex = 0;
+
+	D3DXMatrixScaling(&this->matScaling, (FLOAT)spriteWidth, (FLOAT)spriteHeight, 1.0f);
 }
 
 CSprites * CSprites::__instance = NULL;
@@ -22,11 +39,16 @@ CSprites *CSprites::GetInstance()
 
 void CSprite::Draw(float x, float y)
 {
-	CGame * game = CGame::GetInstance();
-	game->Draw(x, y, texture, left, top, right, bottom);
+	CGame * g = CGame::GetInstance();
+
+	D3DXMATRIX matTranslation;
+	D3DXMatrixTranslation(&matTranslation, x, (g->GetBackBufferHeight() - y), 0.1f);
+	this->sprite.matWorld = (this->matScaling * matTranslation);
+
+	g->GetSpriteHandler()->DrawSpritesImmediate(&sprite, 1, 0, 0);
 }
 
-void CSprites::Add(int id, int left, int top, int right, int bottom, LPDIRECT3DTEXTURE9 tex)
+void CSprites::Add(int id, int left, int top, int right, int bottom, LPTEXTURE tex)
 {
 	LPSPRITE s = new CSprite(id, left, top, right, bottom, tex);
 	sprites[id] = s;
@@ -51,7 +73,7 @@ void CAnimation::Add(int spriteId, DWORD time)
 
 void CAnimation::Render(float x, float y)
 {
-	DWORD now = GetTickCount();
+	ULONGLONG now = GetTickCount64();
 	if (currentFrame == -1) 
 	{
 		currentFrame = 0; 

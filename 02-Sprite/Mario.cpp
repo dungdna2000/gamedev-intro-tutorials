@@ -36,3 +36,11 @@ void CMario::Render()
 
 	ani->Render(x, y);
 }
+
+void CBrick::Render() {
+
+	LPANIMATION ani = CAnimations::GetInstance()->Get(510);
+
+	ani->Render(x, y);
+
+}
