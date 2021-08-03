@@ -2,6 +2,9 @@
 
 #include "GameObject.h"
 
+#include "Animation.h"
+#include "Animations.h"
+
 #define MARIO_WIDTH 14
 
 class CBrick : public CGameObject {

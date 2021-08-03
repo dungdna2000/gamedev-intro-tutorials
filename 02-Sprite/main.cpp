@@ -17,6 +17,14 @@
 #include "debug.h"
 #include "Game.h"
 #include "Textures.h"
+
+#include "Sprite.h"
+#include "Sprites.h"
+
+#include "Animation.h"
+#include "Animations.h"
+
+
 #include "Mario.h"
 
 
