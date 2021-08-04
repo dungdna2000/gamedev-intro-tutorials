@@ -10,65 +10,37 @@
 ================================================================ */
 
 #include <windows.h>
-#include <d3d9.h>
-#include <d3dx9.h>
 
 #include "debug.h"
 #include "Game.h"
 #include "GameObject.h"
 #include "Textures.h"
 
+#include "Animation.h"
+#include "Animations.h"
+#include "Sprite.h"
+#include "Sprites.h"
+
 #include "Mario.h"
 
-#define WINDOW_CLASS_NAME L"SampleWindow"
-#define MAIN_WINDOW_TITLE L"02 - Sprite animation"
+#include "SampleKeyEventHandler.h"
 
-#define BACKGROUND_COLOR D3DCOLOR_XRGB(200, 200, 255)
+#define WINDOW_CLASS_NAME L"SampleWindow"
+#define MAIN_WINDOW_TITLE L"03 - Keyboard and object states"
+
+#define BACKGROUND_COLOR D3DXCOLOR(200.0f/255, 200.0f/255, 255.0f/255, 0.0f)
+
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
-
-#define MAX_FRAME_RATE 90
 
 #define ID_TEX_MARIO 0
 #define ID_TEX_ENEMY 10
 #define ID_TEX_MISC 20
 
-CGame *game;
+#define TEXTURE_PATH_MARIO L"textures\\mario.png"
+
 CMario *mario;
-
-class CSampleKeyHander: public CKeyEventHandler
-{
-	virtual void KeyState(BYTE *states);
-	virtual void OnKeyDown(int KeyCode);
-	virtual void OnKeyUp(int KeyCode);
-};
-
-CSampleKeyHander * keyHandler; 
-
-void CSampleKeyHander::OnKeyDown(int KeyCode)
-{
-	DebugOut(L"[INFO] KeyDown: %d\n", KeyCode);
-	switch (KeyCode)
-	{
-	case DIK_SPACE:
-		mario->SetState(MARIO_STATE_JUMP);
-		break;
-	}
-}
-
-void CSampleKeyHander::OnKeyUp(int KeyCode)
-{
-	DebugOut(L"[INFO] KeyUp: %d\n", KeyCode);
-}
-
-void CSampleKeyHander::KeyState(BYTE *states)
-{
-	if (game->IsKeyDown(DIK_RIGHT))
-		mario->SetState(MARIO_STATE_WALKING_RIGHT);
-	else if (game->IsKeyDown(DIK_LEFT))
-		mario->SetState(MARIO_STATE_WALKING_LEFT);
-	else mario->SetState(MARIO_STATE_IDLE);
-}
+CSampleKeyHandler* keyHandler;
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -91,13 +63,12 @@ void LoadResources()
 {
 	CTextures * textures = CTextures::GetInstance();
 
-	textures->Add(ID_TEX_MARIO, L"textures\\mario.png",D3DCOLOR_XRGB(176, 224, 248));
+	textures->Add(ID_TEX_MARIO, TEXTURE_PATH_MARIO);
 
 	CSprites * sprites = CSprites::GetInstance();
 	CAnimations * animations = CAnimations::GetInstance();
 	
-	LPDIRECT3DTEXTURE9 texMario = textures->Get(ID_TEX_MARIO);
-
+	LPTEXTURE texMario = textures->Get(ID_TEX_MARIO);
 
 	sprites->Add(10001, 246, 154, 260, 181, texMario);
 
@@ -139,7 +110,7 @@ void LoadResources()
 	CMario::AddAnimation(500);		// walk right
 	CMario::AddAnimation(501);		// walk left
 
-	mario->SetPosition(0.0f, 100.0f);
+	mario->SetPosition(50.0f, 100.0f);
 }
 
 /*
@@ -151,30 +122,27 @@ void Update(DWORD dt)
 	mario->Update(dt);
 }
 
-/*
-	Render a frame 
-*/
 void Render()
 {
-	LPDIRECT3DDEVICE9 d3ddv = game->GetDirect3DDevice();
-	LPDIRECT3DSURFACE9 bb = game->GetBackBuffer();
-	LPD3DXSPRITE spriteHandler = game->GetSpriteHandler();
+	CGame* g = CGame::GetInstance();
 
-	if (d3ddv->BeginScene())
-	{
-		// Clear back buffer with a color
-		d3ddv->ColorFill(bb, NULL, BACKGROUND_COLOR);
+	ID3D10Device* pD3DDevice = g->GetDirect3DDevice();
+	IDXGISwapChain* pSwapChain = g->GetSwapChain();
+	ID3D10RenderTargetView* pRenderTargetView = g->GetRenderTargetView();
+	ID3DX10Sprite* spriteHandler = g->GetSpriteHandler();
 
-		spriteHandler->Begin(D3DXSPRITE_ALPHABLEND);
+	// clear the background 
+	pD3DDevice->ClearRenderTargetView(pRenderTargetView, BACKGROUND_COLOR);
 
-		mario->Render();
+	spriteHandler->Begin(D3DX10_SPRITE_SORT_TEXTURE);
 
-		spriteHandler->End();
-		d3ddv->EndScene();
-	}
+	FLOAT NewBlendFactor[4] = { 0,0,0,0 };
+	pD3DDevice->OMSetBlendState(g->GetAlphaBlending(), NewBlendFactor, 0xffffffff);
 
-	// Display back buffer content to the screen
-	d3ddv->Present(NULL, NULL, NULL, NULL);
+	mario->Render();
+
+	spriteHandler->End();
+	pSwapChain->Present(0, 0);
 }
 
 HWND CreateGameWindow(HINSTANCE hInstance, int nCmdShow, int ScreenWidth, int ScreenHeight)
@@ -228,8 +196,8 @@ int Run()
 {
 	MSG msg;
 	int done = 0;
-	DWORD frameStart = GetTickCount();
-	DWORD tickPerFrame = 1000 / MAX_FRAME_RATE;
+	ULONGLONG frameStart = GetTickCount64();
+	ULONGLONG tickPerFrame = 1000 / MAX_FRAME_RATE;
 
 	while (!done)
 	{
@@ -241,40 +209,44 @@ int Run()
 			DispatchMessage(&msg);
 		}
 
-		DWORD now = GetTickCount();
+		ULONGLONG now = GetTickCount64();
 
 		// dt: the time between (beginning of last frame) and now
 		// this frame: the frame we are about to render
-		DWORD dt = now - frameStart;
+		ULONGLONG dt = now - frameStart;
 
 		if (dt >= tickPerFrame)
 		{
 			frameStart = now;
-
-			game->ProcessKeyboard();
-			
-			Update(dt);
+			Update((DWORD)dt);
+			CGame::GetInstance()->ProcessKeyboard();
 			Render();
 		}
 		else
-			Sleep(tickPerFrame - dt);	
+			Sleep((DWORD)(tickPerFrame - dt));
 	}
 
 	return 1;
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
+int WINAPI WinMain(
+	_In_ HINSTANCE hInstance,
+	_In_opt_ HINSTANCE hPrevInstance,
+	_In_ LPSTR lpCmdLine,
+	_In_ int nCmdShow
+) {
 	HWND hWnd = CreateGameWindow(hInstance, nCmdShow, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-	game = CGame::GetInstance();
-	game->Init(hWnd);
+	CGame* game = CGame::GetInstance();
+	game->Init(hWnd, hInstance);
 
-	keyHandler = new CSampleKeyHander();
+	keyHandler = new CSampleKeyHandler();
 	game->InitKeyboard(keyHandler);
 
+	SetWindowPos(hWnd, 0, 0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
 
 	LoadResources();
+
 	Run();
 
 	return 0;
