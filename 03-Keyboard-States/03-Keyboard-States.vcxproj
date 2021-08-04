@@ -128,6 +128,7 @@
     <ClCompile Include="..\02-Sprite\Animation.cpp" />
     <ClCompile Include="..\02-Sprite\Animations.cpp" />
     <ClCompile Include="..\02-Sprite\Sprite.cpp" />
+    <ClCompile Include="Brick.cpp" />
     <ClCompile Include="debug.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameObject.cpp" />
@@ -141,6 +142,7 @@
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AnimationFrame.h" />
     <ClInclude Include="Animations.h" />
+    <ClInclude Include="Brick.h" />
     <ClInclude Include="KeyEventHandler.h" />
     <ClInclude Include="Mario.h" />
     <ClInclude Include="debug.h" />

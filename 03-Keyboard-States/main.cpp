@@ -22,11 +22,14 @@
 #include "Sprites.h"
 
 #include "Mario.h"
+#include "Brick.h"
 
 #include "SampleKeyEventHandler.h"
 
 #define WINDOW_CLASS_NAME L"SampleWindow"
 #define MAIN_WINDOW_TITLE L"03 - Keyboard and object states"
+#define WINDOW_ICON_PATH L"mario.ico"
+
 
 #define BACKGROUND_COLOR D3DXCOLOR(200.0f/255, 200.0f/255, 255.0f/255, 0.0f)
 
@@ -37,10 +40,24 @@
 #define ID_TEX_ENEMY 10
 #define ID_TEX_MISC 20
 
-#define TEXTURE_PATH_MARIO L"textures\\mario.png"
+#define ID_SPRITE_BRICK 20001
 
-CMario *mario;
+#define TEXTURES_DIR L"textures"
+#define TEXTURE_PATH_MARIO TEXTURES_DIR "\\mario.png"
+#define TEXTURE_PATH_MISC TEXTURES_DIR "\\misc.png"
+
+#define MARIO_START_X 0.0f
+#define MARIO_START_Y 100.0f
+
+#define BRICK_X 0.0f
+#define BRICK_Y 121.0f
+#define NUM_BRICKS 50
+
+CMario* mario = NULL;
+
 CSampleKeyHandler* keyHandler;
+
+vector<LPGAMEOBJECT> objects;
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -64,6 +81,7 @@ void LoadResources()
 	CTextures * textures = CTextures::GetInstance();
 
 	textures->Add(ID_TEX_MARIO, TEXTURE_PATH_MARIO);
+	textures->Add(ID_TEX_MISC, TEXTURE_PATH_MISC);
 
 	CSprites * sprites = CSprites::GetInstance();
 	CAnimations * animations = CAnimations::GetInstance();
@@ -80,37 +98,66 @@ void LoadResources()
 	sprites->Add(10012, 155, 154, 170, 181, texMario);
 	sprites->Add(10013, 125, 154, 140, 181, texMario);
 
+	// RUNNING RIGHT 
+	sprites->Add(10021, 335, 154, 335 + 18, 154 +26, texMario);
+	sprites->Add(10022, 363, 154, 363 + 18, 154 + 26, texMario);
+	sprites->Add(10023, 393, 154, 393 + 18, 154 + 26, texMario);
+
+	// RUNNING LEFT
+	sprites->Add(10031, 92, 154, 92 + 18, 154 + 26, texMario);
+	sprites->Add(10032, 66, 154, 66 + 18, 154 + 26, texMario);
+	sprites->Add(10033, 35, 154, 35 + 18, 154 + 26, texMario);
 
 	LPANIMATION ani;
 
 	ani = new CAnimation(100);	
 	ani->Add(10001);
-	animations->Add(400, ani);
+	animations->Add(ID_ANI_MARIO_IDLE_RIGHT, ani);
 
 	ani = new CAnimation(100);
 	ani->Add(10011);
-	animations->Add(401, ani);
-
+	animations->Add(ID_ANI_MARIO_IDLE_LEFT, ani);
 
 	ani = new CAnimation(100);
 	ani->Add(10001);
 	ani->Add(10002);
 	ani->Add(10003);
-	animations->Add(500, ani);
+	animations->Add(ID_ANI_MARIO_WALKING_RIGHT, ani);
 
 	ani = new CAnimation(100);
 	ani->Add(10011);
 	ani->Add(10012);
 	ani->Add(10013);
-	animations->Add(501, ani);
+	animations->Add(ID_ANI_MARIO_WALKING_LEFT, ani);
 
-	mario = new CMario();
-	CMario::AddAnimation(400);		// idle right
-	CMario::AddAnimation(401);		// idle left
-	CMario::AddAnimation(500);		// walk right
-	CMario::AddAnimation(501);		// walk left
+	ani = new CAnimation(100);
+	ani->Add(10021);
+	ani->Add(10022);
+	ani->Add(10023);
+	animations->Add(ID_ANI_MARIO_RUNNING_RIGHT, ani);
 
-	mario->SetPosition(50.0f, 100.0f);
+	ani = new CAnimation(50);	// Mario runs faster hence animation speed should be faster
+	ani->Add(10031);
+	ani->Add(10032);
+	ani->Add(10033);
+	animations->Add(ID_ANI_MARIO_RUNNING_LEFT, ani);
+
+	mario = new CMario(MARIO_START_X, MARIO_START_Y);
+	objects.push_back(mario);
+
+	// Brick objects 
+	LPTEXTURE texMisc = textures->Get(ID_TEX_MISC);
+	sprites->Add(ID_SPRITE_BRICK, 372, 153, 372+15, 153+15, texMisc);
+
+	ani = new CAnimation(100);
+	ani->Add(ID_SPRITE_BRICK);
+	animations->Add(ID_ANI_BRICK,ani);
+
+	for (int i=0;i<NUM_BRICKS;i++) 
+	{
+		CBrick* b = new CBrick(BRICK_X + i * BRICK_WIDTH, BRICK_Y);
+		objects.push_back(b);
+	}
 }
 
 /*
@@ -119,7 +166,10 @@ void LoadResources()
 */
 void Update(DWORD dt)
 {
-	mario->Update(dt);
+	for (int i = 0; i < objects.size(); i++)
+	{
+		objects[i]->Update(dt);
+	}
 }
 
 void Render()
@@ -131,7 +181,6 @@ void Render()
 	ID3D10RenderTargetView* pRenderTargetView = g->GetRenderTargetView();
 	ID3DX10Sprite* spriteHandler = g->GetSpriteHandler();
 
-	// clear the background 
 	pD3DDevice->ClearRenderTargetView(pRenderTargetView, BACKGROUND_COLOR);
 
 	spriteHandler->Begin(D3DX10_SPRITE_SORT_TEXTURE);
@@ -139,7 +188,10 @@ void Render()
 	FLOAT NewBlendFactor[4] = { 0,0,0,0 };
 	pD3DDevice->OMSetBlendState(g->GetAlphaBlending(), NewBlendFactor, 0xffffffff);
 
-	mario->Render();
+	for (int i = 0; i < objects.size(); i++)
+	{
+		objects[i]->Render();
+	}
 
 	spriteHandler->End();
 	pSwapChain->Present(0, 0);
@@ -156,7 +208,7 @@ HWND CreateGameWindow(HINSTANCE hInstance, int nCmdShow, int ScreenWidth, int Sc
 	wc.lpfnWndProc = (WNDPROC)WinProc;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
-	wc.hIcon = NULL;
+	wc.hIcon = (HICON)LoadImage(hInstance, WINDOW_ICON_PATH, IMAGE_ICON, 0, 0, LR_LOADFROMFILE);;
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
 	wc.lpszMenuName = NULL;
