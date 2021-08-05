@@ -22,8 +22,14 @@ void CMario::Update(DWORD dt)
 void CMario::Render()
 {
 	CAnimations* animations = CAnimations::GetInstance();
-	int aniId = 0;
+	int aniId = -1;
 
+	if (vy < 0) // Mario is on air 
+	{
+		if (nx >= 0) aniId = ID_ANI_MARIO_JUMP_WALK_RIGHT;
+		else aniId = ID_ANI_MARIO_JUMP_WALK_LEFT;
+	}
+	else 
 	if (vx == 0)
 	{
 		if (nx > 0) aniId = ID_ANI_MARIO_IDLE_RIGHT;
@@ -44,12 +50,13 @@ void CMario::Render()
 			aniId = ID_ANI_MARIO_WALKING_LEFT;
 	}
 
+	if (aniId == -1) aniId = ID_ANI_MARIO_IDLE_RIGHT;
+
 	animations->Get(aniId)->Render(x, y);
 }
 
 void CMario::SetState(int state)
 {
-	CGameObject::SetState(state);
 	switch (state)
 	{
 	case MARIO_STATE_RUNNING_RIGHT:
@@ -69,12 +76,21 @@ void CMario::SetState(int state)
 		nx = -1;
 		break;
 	case MARIO_STATE_JUMP: 
-		if (y== GROUND_Y)
-			vy = -MARIO_JUMP_SPEED_Y;
+		if (y == GROUND_Y)
+		{
+			if (this->state == MARIO_STATE_RUNNING_LEFT || this->state == MARIO_STATE_RUNNING_RIGHT)
+				vy = -MARIO_JUMP_RUN_SPEED_Y;
+			else 
+				vy = -MARIO_JUMP_SPEED_Y;
+		}
+		break;
+			
 
 	case MARIO_STATE_IDLE: 
 		vx = 0;
 		break;
 	}
+
+	CGameObject::SetState(state);
 }
 

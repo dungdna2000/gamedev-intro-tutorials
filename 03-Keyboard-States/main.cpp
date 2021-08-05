@@ -27,7 +27,7 @@
 #include "SampleKeyEventHandler.h"
 
 #define WINDOW_CLASS_NAME L"SampleWindow"
-#define MAIN_WINDOW_TITLE L"03 - Keyboard and object states"
+#define MAIN_WINDOW_TITLE L"03 - Keyboard and Mario states"
 #define WINDOW_ICON_PATH L"mario.ico"
 
 
@@ -108,6 +108,11 @@ void LoadResources()
 	sprites->Add(10032, 66, 154, 66 + 18, 154 + 26, texMario);
 	sprites->Add(10033, 35, 154, 35 + 18, 154 + 26, texMario);
 
+	// JUMP WALK RIGHT & LEFT 
+	sprites->Add(10041, 395, 275, 395 + 16, 275 + 25, texMario);
+	sprites->Add(10042, 35, 275, 35 + 16, 275 + 25, texMario);
+
+
 	LPANIMATION ani;
 
 	ani = new CAnimation(100);	
@@ -141,6 +146,15 @@ void LoadResources()
 	ani->Add(10032);
 	ani->Add(10033);
 	animations->Add(ID_ANI_MARIO_RUNNING_LEFT, ani);
+
+	ani = new CAnimation(100);
+	ani->Add(10041);
+	animations->Add(ID_ANI_MARIO_JUMP_WALK_RIGHT, ani);
+
+	ani = new CAnimation(100);	
+	ani->Add(10042);
+	animations->Add(ID_ANI_MARIO_JUMP_WALK_LEFT, ani);
+
 
 	mario = new CMario(MARIO_START_X, MARIO_START_Y);
 	objects.push_back(mario);
