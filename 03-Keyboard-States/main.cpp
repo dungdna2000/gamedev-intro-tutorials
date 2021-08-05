@@ -112,6 +112,13 @@ void LoadResources()
 	sprites->Add(10041, 395, 275, 395 + 16, 275 + 25, texMario);
 	sprites->Add(10042, 35, 275, 35 + 16, 275 + 25, texMario);
 
+	// JUMP RUN RIGHT & LEFT 
+	sprites->Add(10043, 395, 195, 395 + 18, 195 + 25, texMario);
+	sprites->Add(10044, 33, 195, 33 + 18, 195 + 25, texMario);
+
+	// SIT RIGHT/LEFT
+	sprites->Add(10051, 426, 239, 426 + 14, 239 + 17, texMario);
+	sprites->Add(10052, 5, 239, 5 + 14, 239 + 17, texMario);
 
 	LPANIMATION ani;
 
@@ -155,6 +162,21 @@ void LoadResources()
 	ani->Add(10042);
 	animations->Add(ID_ANI_MARIO_JUMP_WALK_LEFT, ani);
 
+	ani = new CAnimation(100);
+	ani->Add(10043);
+	animations->Add(ID_ANI_MARIO_JUMP_RUN_RIGHT, ani);
+
+	ani = new CAnimation(100);
+	ani->Add(10044);
+	animations->Add(ID_ANI_MARIO_JUMP_RUN_LEFT, ani);
+
+	ani = new CAnimation(100);
+	ani->Add(10051);
+	animations->Add(ID_ANI_MARIO_SIT_RIGHT, ani);
+
+	ani = new CAnimation(100);
+	ani->Add(10052);
+	animations->Add(ID_ANI_MARIO_SIT_LEFT, ani);
 
 	mario = new CMario(MARIO_START_X, MARIO_START_Y);
 	objects.push_back(mario);
