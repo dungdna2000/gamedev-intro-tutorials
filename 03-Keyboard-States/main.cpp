@@ -46,11 +46,11 @@
 #define TEXTURE_PATH_MARIO TEXTURES_DIR "\\mario.png"
 #define TEXTURE_PATH_MISC TEXTURES_DIR "\\misc.png"
 
-#define MARIO_START_X 0.0f
-#define MARIO_START_Y 100.0f
+#define MARIO_START_X 200.0f
+#define MARIO_START_Y 10.0f
 
 #define BRICK_X 0.0f
-#define BRICK_Y 121.0f
+#define BRICK_Y GROUND_Y + 20.0f
 #define NUM_BRICKS 50
 
 CMario* mario = NULL;
@@ -120,6 +120,10 @@ void LoadResources()
 	sprites->Add(10051, 426, 239, 426 + 14, 239 + 17, texMario);
 	sprites->Add(10052, 5, 239, 5 + 14, 239 + 17, texMario);
 
+	// BRACING RIGHT/LEFT
+	sprites->Add(10061, 425, 154, 425 + 15, 154 + 27, texMario);
+	sprites->Add(10062, 5, 154, 5 + 15, 154 + 27, texMario);
+
 	LPANIMATION ani;
 
 	ani = new CAnimation(100);	
@@ -177,6 +181,14 @@ void LoadResources()
 	ani = new CAnimation(100);
 	ani->Add(10052);
 	animations->Add(ID_ANI_MARIO_SIT_LEFT, ani);
+
+	ani = new CAnimation(100);
+	ani->Add(10061);
+	animations->Add(ID_ANI_MARIO_BRACE_RIGHT, ani);
+
+	ani = new CAnimation(100);
+	ani->Add(10062);
+	animations->Add(ID_ANI_MARIO_BRACE_LEFT, ani);
 
 	mario = new CMario(MARIO_START_X, MARIO_START_Y);
 	objects.push_back(mario);
@@ -324,6 +336,8 @@ int WINAPI WinMain(
 	_In_ int nCmdShow
 ) {
 	HWND hWnd = CreateGameWindow(hInstance, nCmdShow, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+	SetDebugWindow(hWnd);
 
 	CGame* game = CGame::GetInstance();
 	game->Init(hWnd, hInstance);
