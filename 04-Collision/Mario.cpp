@@ -156,18 +156,21 @@ void CMario::SetState(int state)
 
 void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom)
 {
-	left = x;
-	top = y; 
+ 
 
 	if (level==MARIO_LEVEL_BIG)
 	{
-		right = x + MARIO_BIG_BBOX_WIDTH;
-		bottom = y + MARIO_BIG_BBOX_HEIGHT;
+		left = x - MARIO_BIG_BBOX_WIDTH/2;
+		top = y - MARIO_BIG_BBOX_HEIGHT/2;
+		right = left + MARIO_BIG_BBOX_WIDTH;
+		bottom = top + MARIO_BIG_BBOX_HEIGHT;
 	}
 	else
 	{
-		right = x + MARIO_SMALL_BBOX_WIDTH;
-		bottom = y + MARIO_SMALL_BBOX_HEIGHT;
+		left = x - MARIO_SMALL_BBOX_WIDTH/2;
+		top = y - MARIO_SMALL_BBOX_HEIGHT/2;
+		right = left + MARIO_SMALL_BBOX_WIDTH;
+		bottom = top + MARIO_SMALL_BBOX_HEIGHT;
 	}
 }
 
