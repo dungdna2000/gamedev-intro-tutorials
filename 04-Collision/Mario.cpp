@@ -21,7 +21,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	// turn off collision when die 
 	if (state!=MARIO_STATE_DIE)
-		CalcPotentialCollisions(coObjects, coEvents);
+		ScanCollions(coObjects, coEvents);
 
 	// reset untouchable timer if untouchable time has passed
 	if ( GetTickCount() - untouchable_start > MARIO_UNTOUCHABLE_TIME) 
@@ -42,10 +42,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny);
 
-		// block 
+		// TEMPORARY *NOT GOOD* LOGIC: everthing blocks Mario. 
+		// This logic has to be changed later based on the real game logic
 		x += min_tx*dx + nx*0.4f;		// nx*0.4f : need to push out a bit to avoid overlapping next frame
 		y += min_ty*dy + ny*0.4f;
 		
+		// Stop Mario when blocked. Sometimes, there is no need to set velocity to 0 
 		if (nx!=0) vx = 0;
 		if (ny!=0) vy = 0;
 
@@ -122,7 +124,7 @@ void CMario::Render()
 
 	int alpha = 255;
 	if (untouchable) alpha = 128;
-	animations[ani]->Render(x, y, alpha);
+	animations[ani]->Render(x, y);
 
 	RenderBoundingBox();
 }

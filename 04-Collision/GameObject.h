@@ -1,9 +1,11 @@
 #pragma once
 
 #include <Windows.h>
-#include <d3dx9.h>
+#include <d3dx10.h>
 #include <vector>
 
+#include "Animation.h"
+#include "Animations.h"
 #include "Sprites.h"
 
 
@@ -62,7 +64,7 @@ public:
 	void RenderBoundingBox();
 
 	LPCOLLISIONEVENT SweptAABBEx(LPGAMEOBJECT coO);
-	void CalcPotentialCollisions(vector<LPGAMEOBJECT> *coObjects, vector<LPCOLLISIONEVENT> &coEvents);
+	void ScanCollions(vector<LPGAMEOBJECT> *coObjects, vector<LPCOLLISIONEVENT> &coEvents);
 	void FilterCollision(
 		vector<LPCOLLISIONEVENT> &coEvents, 
 		vector<LPCOLLISIONEVENT> &coEventsResult, 
