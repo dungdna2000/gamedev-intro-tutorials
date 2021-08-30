@@ -2,8 +2,6 @@
 
 void CGoomba::GetBoundingBox(float &left, float &top, float &right, float &bottom)
 {
-
-
 	if (state == GOOMBA_STATE_DIE)
 	{
 		left = x - GOOMBA_BBOX_WIDTH/2;
@@ -48,7 +46,7 @@ void CGoomba::Render()
 	}
 
 	animations[ani]->Render(x,y);
-	//RenderBoundingBox();
+	RenderBoundingBox();
 }
 
 void CGoomba::SetState(int state)

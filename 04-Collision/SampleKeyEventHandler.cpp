@@ -7,7 +7,7 @@
 
 extern CMario* mario;
 
-/*void CSampleKeyHandler::OnKeyDown(int KeyCode)
+void CSampleKeyHandler::OnKeyDown(int KeyCode)
 {
 	DebugOut(L"[INFO] KeyDown: %d\n", KeyCode);
 	switch (KeyCode)
@@ -15,19 +15,7 @@ extern CMario* mario;
 	case DIK_S:
 		mario->SetState(MARIO_STATE_JUMP);
 		break;
-	}
-}
-*/
-
-void CSampleKeyHandler::OnKeyDown(int KeyCode)
-{
-	DebugOut(L"[INFO] KeyDown: %d\n", KeyCode);
-	switch (KeyCode)
-	{
-	case DIK_SPACE:
-		mario->SetState(MARIO_STATE_JUMP);
-		break;
-	case DIK_A: // reset
+	case DIK_R: // reset
 		mario->SetState(MARIO_STATE_IDLE);
 		mario->SetLevel(MARIO_LEVEL_BIG);
 		mario->SetPosition(50.0f, 0.0f);
@@ -39,7 +27,7 @@ void CSampleKeyHandler::OnKeyDown(int KeyCode)
 void CSampleKeyHandler::OnKeyUp(int KeyCode)
 {
 	DebugOut(L"[INFO] KeyUp: %d\n", KeyCode);
-/*	switch (KeyCode)
+	switch (KeyCode)
 	{
 	case DIK_S:
 		mario->SetState(MARIO_STATE_RELEASE_JUMP);
@@ -48,10 +36,9 @@ void CSampleKeyHandler::OnKeyUp(int KeyCode)
 		mario->SetState(MARIO_STATE_SIT_RELEASE);
 		break;
 	}
-*/
 }
 
-void CSampleKeyHandler::KeyState(BYTE* states)
+/*void CSampleKeyHandler::KeyState(BYTE* states)
 {
 	CGame* game = CGame::GetInstance();
 
@@ -64,8 +51,8 @@ void CSampleKeyHandler::KeyState(BYTE* states)
 	else
 		mario->SetState(MARIO_STATE_IDLE);
 }
+*/
 
-/*
 void CSampleKeyHandler::KeyState(BYTE *states)
 {
 	CGame* game = CGame::GetInstance();
@@ -93,4 +80,3 @@ void CSampleKeyHandler::KeyState(BYTE *states)
 		mario->SetState(MARIO_STATE_SIT);
 	}
 }
-*/

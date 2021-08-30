@@ -2,8 +2,8 @@
 
 void CBrick::Render()
 {
-	animations[0]->Render(x, y);
-	RenderBoundingBox();
+	CAnimations* animations = CAnimations::GetInstance();
+	animations->Get(ID_ANI_BRICK)->Render(x, y);
 }
 
 void CBrick::GetBoundingBox(float &l, float &t, float &r, float &b)
