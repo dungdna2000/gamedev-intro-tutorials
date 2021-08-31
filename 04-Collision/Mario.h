@@ -61,7 +61,6 @@
 
 #define GROUND_Y 160.0f
 
-#define MARIO_SIT_HEIGHT_ADJUST 4.0f
 
 #define MARIO_ANI_DIE				8
 
@@ -69,10 +68,16 @@
 #define	MARIO_LEVEL_BIG		2
 
 #define MARIO_BIG_BBOX_WIDTH  15
-#define MARIO_BIG_BBOX_HEIGHT 27
+#define MARIO_BIG_BBOX_HEIGHT 26
+#define MARIO_BIG_SITTING_BBOX_WIDTH  14
+#define MARIO_BIG_SITTING_BBOX_HEIGHT 18
+
+#define MARIO_SIT_HEIGHT_ADJUST ((MARIO_BIG_BBOX_HEIGHT-MARIO_BIG_SITTING_BBOX_HEIGHT)/2)
 
 #define MARIO_SMALL_BBOX_WIDTH  13
 #define MARIO_SMALL_BBOX_HEIGHT 15
+
+
 
 #define MARIO_UNTOUCHABLE_TIME 5000
 
@@ -85,7 +90,7 @@ class CMario : public CGameObject
 
 	int level; 
 	int untouchable; 
-	DWORD untouchable_start;
+	ULONGLONG untouchable_start;
 	BOOLEAN isOnPlatform;
 
 public:
@@ -106,7 +111,7 @@ public:
 	void SetState(int state);
 
 	void SetLevel(int l) { level = l; }
-	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount(); }
+	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount64(); }
 
 	void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 };

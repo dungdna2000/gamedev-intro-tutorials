@@ -9,8 +9,8 @@
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
 	vy += ay * dt;
-
 	vx += ax * dt;
+
 	if (abs(vx) > abs(maxVx)) vx = maxVx;
 
 	// Calculate dx, dy 
@@ -26,7 +26,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		ScanCollions(coObjects, coEvents);
 
 	// reset untouchable timer if untouchable time has passed
-	if ( GetTickCount() - untouchable_start > MARIO_UNTOUCHABLE_TIME) 
+	if ( GetTickCount64() - untouchable_start > MARIO_UNTOUCHABLE_TIME) 
 	{
 		untouchable_start = 0;
 		untouchable = 0;
@@ -49,7 +49,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		// TEMPORARY *NOT GOOD* LOGIC: everthing blocks Mario. 
 		// This logic has to be changed later based on the real game logic
 		x += min_tx*dx + nx*0.4f;		// nx*0.4f : need to push out a bit to avoid overlapping next frame
-
 		y += min_ty*dy + ny*0.4f;
 		
 		// Stop Mario when blocked. Sometimes, there is no need to set velocity to 0 
@@ -101,21 +100,16 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	// clean up collision events
 	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
-
-	DebugOutTitle(L"vx: %0.5f \n", vx);
 }
 
 void CMario::Render()
 {
-
-	//DebugOutTitle(L"isOnPlatform: %d", isOnPlatform);
-
 	CAnimations* animations = CAnimations::GetInstance();
 	int aniId = -1;
 
 	if (!isOnPlatform)
 	{
-		if (abs(ax) == MARIO_ACCEL_RUN_X) // TODO: need to optimize this
+		if (abs(ax) == MARIO_ACCEL_RUN_X) 
 		{
 			if (nx >= 0)
 				aniId = ID_ANI_MARIO_JUMP_RUN_RIGHT;
@@ -165,10 +159,10 @@ void CMario::Render()
 
 	if (aniId == -1) aniId = ID_ANI_MARIO_IDLE_RIGHT;
 
-	float d = 0;
-	if (isSitting) d = MARIO_SIT_HEIGHT_ADJUST;
+	//float d = 0;
+	//if (isSitting) d = MARIO_SIT_HEIGHT_ADJUST;
 
-	animations->Get(aniId)->Render(x, y + d);
+	animations->Get(aniId)->Render(x, y);
 
 	RenderBoundingBox();
 }
@@ -286,15 +280,15 @@ void CMario::SetState(int state)
 		{
 			state = MARIO_STATE_IDLE;
 			isSitting = true;
-			vx = 0; vy = 0;
-			//y += MARIO_SIT_HEIGHT_ADJUST;
+			vx = 0; vy = 0.0f;
+			y +=MARIO_SIT_HEIGHT_ADJUST;
 		}
 		break;
 
 	case MARIO_STATE_SIT_RELEASE:
 		isSitting = false;
 		state = MARIO_STATE_IDLE;
-		//y -= MARIO_SIT_HEIGHT_ADJUST;
+		y -= MARIO_SIT_HEIGHT_ADJUST;
 		break;
 
 	case MARIO_STATE_IDLE:
@@ -310,10 +304,20 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 {
 	if (level==MARIO_LEVEL_BIG)
 	{
-		left = x - MARIO_BIG_BBOX_WIDTH/2;
-		top = y - MARIO_BIG_BBOX_HEIGHT/2;
-		right = left + MARIO_BIG_BBOX_WIDTH;
-		bottom = top + MARIO_BIG_BBOX_HEIGHT;
+		if (isSitting)
+		{
+			left = x - MARIO_BIG_SITTING_BBOX_WIDTH / 2;
+			top = y - MARIO_BIG_SITTING_BBOX_HEIGHT / 2;
+			right = left + MARIO_BIG_SITTING_BBOX_WIDTH;
+			bottom = top + MARIO_BIG_SITTING_BBOX_HEIGHT;
+		}
+		else 
+		{
+			left = x - MARIO_BIG_BBOX_WIDTH/2;
+			top = y - MARIO_BIG_BBOX_HEIGHT/2;
+			right = left + MARIO_BIG_BBOX_WIDTH;
+			bottom = top + MARIO_BIG_BBOX_HEIGHT;
+		}
 	}
 	else
 	{
