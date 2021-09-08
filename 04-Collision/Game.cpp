@@ -455,8 +455,8 @@ void CGame::SweptAABB(
 	
 	if (dy == 0)
 	{
-		ty_entry = -99999999999;
-		ty_exit = 99999999999;
+		ty_entry = -99999999999.0f;
+		ty_exit = 99999999999.0f;
 	}
 	else
 	{
