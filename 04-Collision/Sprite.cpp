@@ -30,9 +30,11 @@ CSprite::CSprite(int id, int left, int top, int right, int bottom, LPTEXTURE tex
 void CSprite::Draw(float x, float y)
 {
 	CGame* g = CGame::GetInstance();
+	float cx, cy;
+	g->GetCamPos(cx, cy);
 
 	D3DXMATRIX matTranslation;
-	D3DXMatrixTranslation(&matTranslation, x, g->GetBackBufferHeight() - y, 0.1f);
+	D3DXMatrixTranslation(&matTranslation, x - cx, (g->GetBackBufferHeight() - y) + cy, 0.1f);
 	this->sprite.matWorld = (this->matScaling * matTranslation);
 
 	g->GetSpriteHandler()->DrawSpritesImmediate(&sprite, 1, 0, 0);
