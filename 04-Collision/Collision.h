@@ -45,6 +45,21 @@ class CCollision
 {
 	static CCollision* __instance;
 public: 
+	static void SweptAABB(
+		float ml,			// move left 
+		float mt,			// move top
+		float mr,			// move right 
+		float mb,			// move bottom
+		float dx,			// 
+		float dy,			// 
+		float sl,			// static left
+		float st,
+		float sr,
+		float sb,
+		float& t,
+		float& nx,
+		float& ny);
+
 	LPCOLLISIONEVENT SweptAABBEx(LPGAMEOBJECT objSrc, LPGAMEOBJECT objDest); 
 	void Scan(LPGAMEOBJECT objSrc, vector<LPGAMEOBJECT>* objDests, vector<LPCOLLISIONEVENT>& coEvents);
 	void Filter(
