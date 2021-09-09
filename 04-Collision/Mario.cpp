@@ -6,6 +6,10 @@
 
 #include "Goomba.h"
 
+#include "Collision.h"
+
+#define BLOCK_PUSH_FACTOR 0.4f
+
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
 	vy += ay * dt;
@@ -21,9 +25,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	coEvents.clear();
 
+	CCollision *coll = CCollision::GetInstance();
+
 	// turn off collision when die 
 	if (state!=MARIO_STATE_DIE)
-		ScanCollions(coObjects, coEvents);
+		coll->Scan(this, coObjects, coEvents);
 
 	// reset untouchable timer if untouchable time has passed
 	if ( GetTickCount64() - untouchable_start > MARIO_UNTOUCHABLE_TIME) 
@@ -44,16 +50,13 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	{
 		float min_tx, min_ty, nx = 0, ny;
 
-		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny);
+		coll->Filter(this, coEvents, coEventsResult, min_tx, min_ty, nx, ny);
 
 		// TEMPORARY *NOT GOOD* LOGIC: everthing blocks Mario. 
 		// This logic has to be changed later based on the real game logic
-		x += min_tx*dx + nx*0.4f;		// nx*0.4f : need to push out a bit to avoid overlapping next frame
-		y += min_ty*dy + ny*0.4f;
+		x += min_tx*dx + nx*BLOCK_PUSH_FACTOR;		// need to push out a bit to avoid overlapping next frame
+		y += min_ty*dy + ny*BLOCK_PUSH_FACTOR;
 		
-		// Stop Mario when blocked. Sometimes, there is no need to set velocity to 0 
-		//if (nx!=0) vx = 0;
-
 		if (ny != 0)
 		{
 			vy = 0;

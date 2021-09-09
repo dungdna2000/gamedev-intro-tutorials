@@ -263,7 +263,7 @@ void CPlayScene::Render()
 }
 
 /*
-	Unload current scene
+	Unload scene
 */
 void CPlayScene::Unload()
 {
@@ -273,7 +273,7 @@ void CPlayScene::Unload()
 	objects.clear();
 	player = NULL;
 
-	DebugOut(L"[INFO] Scene %s unloaded! \n", sceneFilePath);
+	DebugOut(L"[INFO] Scene %d unloaded! \n", id);
 }
 
 void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)

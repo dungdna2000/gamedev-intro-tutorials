@@ -63,12 +63,11 @@ LPCOLLISIONEVENT CGameObject::SweptAABBEx(LPGAMEOBJECT coO)
 	coObjects: the list of colliable objects
 	coEvents: list of potential collisions
 */
-void CGameObject::CalcPotentialCollisions(
+void CGameObject::ScanCollions(
 	vector<LPGAMEOBJECT> *coObjects, 
 	vector<LPCOLLISIONEVENT> &coEvents)
 {
-	for (UINT i = 0; i < coObjects->size(); i++)
-	{
+	for (UINT i = 0; i < coObjects->size(); i++) {
 		LPCOLLISIONEVENT e = SweptAABBEx(coObjects->at(i));
 
 		if (e->t > 0 && e->t <= 1.0f)
@@ -80,6 +79,60 @@ void CGameObject::CalcPotentialCollisions(
 	std::sort(coEvents.begin(), coEvents.end(), CCollisionEvent::compare);
 }
 
+/*
+	Search for the earliest collision event 
+*/
+LPCOLLISIONEVENT CGameObject::GetEarliestCollision(vector<LPCOLLISIONEVENT> &coEvents) {
+	
+	if (coEvents.size() == 0) return NULL;
+
+	float min_t = 1.0f;
+	int min_i = -1;
+
+	for (UINT i = 0; i < coEvents.size(); i++) {
+		LPCOLLISIONEVENT c = coEvents[i];
+		if (c->t < min_t) {
+			min_t = c->t; min_i = i;
+		}
+	}
+
+	return coEvents[min_i];
+}
+
+/*
+	Search for the earliest collision event on X and Y
+*/
+void CGameObject::FilterCollision(
+	vector<LPCOLLISIONEVENT> &coEvents,
+	LPCOLLISIONEVENT &coEventX,
+	LPCOLLISIONEVENT &coEventY
+) {
+	float min_tx = 1.0f;
+	float min_ty = 1.0f;
+
+	int min_ix = -1;
+	int min_iy = -1;
+
+	for (UINT i = 0; i < coEvents.size(); i++) {
+		LPCOLLISIONEVENT c = coEvents[i];
+		if (c->isDeleted) continue;
+
+		if (c->t < min_tx && c->nx != 0) {
+			min_tx = c->t; min_ix = i;
+		}
+
+		if (c->t < min_ty  && c->ny != 0) {
+			min_ty = c->t; min_iy = i;
+		}
+	}
+
+	coEventX = (min_ix >= 0) ? coEvents[min_ix] : NULL ;
+	coEventY = (min_iy >= 0) ? coEvents[min_iy] : NULL ;
+}
+
+/*
+	Obsoleted version, DO NOT USE
+*/
 void CGameObject::FilterCollision(
 	vector<LPCOLLISIONEVENT> &coEvents,
 	vector<LPCOLLISIONEVENT> &coEventsResult,

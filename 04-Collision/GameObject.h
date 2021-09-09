@@ -7,30 +7,11 @@
 #include "Animation.h"
 #include "Animations.h"
 #include "Sprites.h"
-
+#include "Collision.h"
 
 using namespace std;
 
 #define ID_TEX_BBOX -100		// special texture to draw object bounding box
-
-class CGameObject; 
-typedef CGameObject * LPGAMEOBJECT;
-
-struct CCollisionEvent;
-typedef CCollisionEvent * LPCOLLISIONEVENT;
-struct CCollisionEvent
-{
-	LPGAMEOBJECT obj;
-	float t, nx, ny;
-	CCollisionEvent(float t, float nx, float ny, LPGAMEOBJECT obj = NULL) { this->t = t; this->nx = nx; this->ny = ny; this->obj = obj; }
-
-	static bool compare(const LPCOLLISIONEVENT &a, LPCOLLISIONEVENT &b)
-	{
-		return a->t < b->t;
-	}
-};
-
-
 
 class CGameObject
 {
@@ -62,16 +43,6 @@ public:
 	int GetState() { return this->state; }
 
 	void RenderBoundingBox();
-
-	LPCOLLISIONEVENT SweptAABBEx(LPGAMEOBJECT coO);
-	void ScanCollions(vector<LPGAMEOBJECT> *coObjects, vector<LPCOLLISIONEVENT> &coEvents);
-	void FilterCollision(
-		vector<LPCOLLISIONEVENT> &coEvents, 
-		vector<LPCOLLISIONEVENT> &coEventsResult, 
-		float &min_tx, 
-		float &min_ty, 
-		float &nx, 
-		float &ny);
 
 	void AddAnimation(int aniId);
 

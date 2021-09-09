@@ -5,6 +5,10 @@
 10	textures\enemies.png	3	26	110
 
 # id	left	top	right	bottom	texture_id
+
+#[SHARED]
+#shared_assets.txt 
+
 [SPRITES]
 # BIG MARIO 
 # idle right

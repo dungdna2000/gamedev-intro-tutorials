@@ -8,6 +8,8 @@
 #include "Goomba.h"
 #include "Portal.h"
 
+#define BLOCK_PUSH_FACTOR 0.4f
+
 CMario::CMario(float x, float y) : CGameObject()
 {
 	level = MARIO_LEVEL_BIG;
@@ -35,7 +37,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	// turn off collision when die 
 	if (state!=MARIO_STATE_DIE)
-		CalcPotentialCollisions(coObjects, coEvents);
+		ScanCollions(coObjects, coEvents);
 
 	// reset untouchable timer if untouchable time has passed
 	if ( GetTickCount() - untouchable_start > MARIO_UNTOUCHABLE_TIME) 
@@ -45,37 +47,94 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	}
 
 	// No collision occured, proceed normally
-	if (coEvents.size()==0)
-	{
+	if (coEvents.size()==0) {
 		x += dx; 
 		y += dy;
 	}
-	else
-	{
+	else {
+
 		float min_tx, min_ty, nx = 0, ny;
 		float rdx = 0; 
 		float rdy = 0;
 
-		// TODO: This is a very ugly designed function!!!!
-		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
+		LPCOLLISIONEVENT colX = NULL; 
+		LPCOLLISIONEVENT colY = NULL;
+		FilterCollision(coEvents, colX, colY);
 
-		// how to push back Mario if collides with a moving objects, what if Mario is pushed this way into another object?
-		//if (rdx != 0 && rdx!=dx)
-		//	x += nx*abs(rdx); 
-		
-		// block every object first!
-		x += min_tx*dx + nx*0.4f;
-		y += min_ty*dy + ny*0.4f;
+		if (colX != NULL && colY != NULL) {
+			if (colY->t < colX->t) { // if collision on Y first 
+				//push back on Y as usual
+				y += colY->t*dy + colY->ny*BLOCK_PUSH_FACTOR;
+				vy = 0; dy = 0;
 
-		if (nx!=0) vx = 0;
-		if (ny!=0) vy = 0;
+				colY->isDeleted = true;
 
+				coEventsResult.push_back(colY);
+
+				// check if still collide on X ?
+				LPCOLLISIONEVENT colX_ = SweptAABBEx(colX->obj);
+				if (colX_->t > 0 && colX_->t <= 1.0f) {
+					x += colX_->t*dx + colX_->nx*BLOCK_PUSH_FACTOR;
+					vx = 0; dx = 0; 
+
+					coEventsResult.push_back(colX_); // be aware of memory leak !!
+
+					DebugOut(L"Mario hit on X (case 2) \n");
+				}
+				else {
+					colX->isDeleted = true; 
+
+					// search "next" collision on X
+					LPCOLLISIONEVENT colX_next,colY_next;
+					FilterCollision(coEvents, colX_next, colY_next);
+					if (colX_next != NULL) {
+						x += colX_next->t*dx + colX_next->nx*BLOCK_PUSH_FACTOR;
+						vx = 0; dx = 0;
+
+						coEventsResult.push_back(colX_next);
+
+						DebugOut(L"Mario hit on X (case 3) \n");
+					}
+					else 
+						x += dx;
+				}
+			}
+			else { // collision on X first
+				//TODO: similar logic as Y first 
+				//push back both X & Y 
+				x += colX->t*dx + colX->nx*BLOCK_PUSH_FACTOR;
+				y += colY->t*dy + colY->ny*BLOCK_PUSH_FACTOR;
+
+				coEventsResult.push_back(colX);
+				coEventsResult.push_back(colY);
+			}
+		}
+		else if (colX!= NULL ) {
+			x += colX->t*dx + colX->nx*BLOCK_PUSH_FACTOR;
+			vx = 0;
+			dx = 0; 
+
+			y += dy;
+
+			coEventsResult.push_back(colX);
+			
+			DebugOut(L"Mario hit on X \n");
+		}
+		else { // colY != NULL
+			y += colY->t*dy + colY->ny*BLOCK_PUSH_FACTOR;
+			vy = 0;
+			dy = 0; 
+
+			coEventsResult.push_back(colY);
+
+
+			x += dx;
+		}
 
 		//
 		// Collision logic with other objects
 		//
-		for (UINT i = 0; i < coEventsResult.size(); i++)
-		{
+		for (UINT i = 0; i < coEventsResult.size(); i++) {
 			LPCOLLISIONEVENT e = coEventsResult[i];
 
 			if (dynamic_cast<CGoomba *>(e->obj)) // if e->obj is Goomba 
@@ -114,10 +173,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				CGame::GetInstance()->SwitchScene(p->GetSceneId());
 			}
 		}
+
 	}
 
 	// clean up collision events
-	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
+	//for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
 }
 
 void CMario::Render()

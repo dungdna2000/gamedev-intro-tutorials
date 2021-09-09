@@ -22,22 +22,22 @@ CTextures *CTextures::GetInstance()
 
 void CTextures::Add(int id, LPCWSTR filePath, D3DCOLOR transparentColor)
 {
-	D3DXIMAGE_INFO info;
+	/*D3DXIMAGE_INFO info;
 	HRESULT result = D3DXGetImageInfoFromFile(filePath, &info);
 	if (result != D3D_OK)
 	{
 		DebugOut(L"[ERROR] GetImageInfoFromFile failed: %s\n", filePath);
 		return;
-	}
+	}*/
 
 	LPDIRECT3DDEVICE9 d3ddv = CGame::GetInstance()->GetDirect3DDevice();
 	LPDIRECT3DTEXTURE9 texture;
 
-	result = D3DXCreateTextureFromFileEx(
+	HRESULT result = D3DXCreateTextureFromFileEx(
 		d3ddv,								// Pointer to Direct3D device object
 		filePath,							// Path to the image to load
-		info.Width,							// Texture width
-		info.Height,						// Texture height
+		D3DX_DEFAULT_NONPOW2, //info.Width,							// Texture width
+		D3DX_DEFAULT_NONPOW2, //info.Height,						// Texture height
 		1,
 		D3DUSAGE_DYNAMIC,
 		D3DFMT_UNKNOWN,
@@ -45,7 +45,7 @@ void CTextures::Add(int id, LPCWSTR filePath, D3DCOLOR transparentColor)
 		D3DX_DEFAULT,
 		D3DX_DEFAULT,
 		transparentColor,			
-		&info,
+		NULL, //&info,
 		NULL,
 		&texture);								// Created texture pointer
 
