@@ -43,9 +43,9 @@ WARNING: This one file example has a hell LOT of *sinful* programming practices
 
 HWND hWnd = 0;
 
-#define D3DCOLOR_WHITE D3DCOLOR_XRGB(255, 255, 255)
+// Each color is from 0.0f to 1.0f  ( 0/255 to 255/255 ) 
+#define BACKGROUND_COLOR D3DXCOLOR(0.2f, 0.2f, 0.2f, 0.2f)
 
-#define BACKGROUND_COLOR D3DCOLOR_XRGB(0, 0, 0)
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 
@@ -337,7 +337,7 @@ void Render()
 	if (pD3DDevice != NULL)
 	{
 		// clear the target buffer
-		pD3DDevice->ClearRenderTargetView(pRenderTargetView, D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f));
+		pD3DDevice->ClearRenderTargetView(pRenderTargetView, BACKGROUND_COLOR);
 
 		// start drawing the sprites
 		spriteObject->Begin(D3DX10_SPRITE_SORT_TEXTURE);
