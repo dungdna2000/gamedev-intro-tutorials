@@ -58,6 +58,7 @@
 #define MARIO_START_Y 10.0f
 
 #define ID_SPRITE_BRICK 20001
+#define ID_SPRITE_GOOMBA 30000
 
 #define BRICK_X 0.0f
 #define BRICK_Y GROUND_Y + 20.0f
@@ -97,6 +98,7 @@ void LoadResources()
 	CTextures * textures = CTextures::GetInstance();
 
 	textures->Add(ID_TEX_MARIO, TEXTURE_PATH_MARIO);
+	textures->Add(ID_TEX_ENEMY, TEXTURE_PATH_ENEMY);
 	textures->Add(ID_TEX_MISC, TEXTURE_PATH_MISC);
 	textures->Add(ID_TEX_BBOX, TEXTURE_PATH_BBOX);
 
@@ -225,7 +227,7 @@ void LoadResources()
 		objects.push_back(b);
 	}
 
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		CBrick* b = new CBrick(BRICK_X + i * BRICK_WIDTH, BRICK_Y - 44.0f);
 		objects.push_back(b);
@@ -237,10 +239,33 @@ void LoadResources()
 		objects.push_back(b);
 	}
 
-	for (int i = 0; i < 50; i++)
-	{
-		CBrick* b = new CBrick(BRICK_X + 132.0f + i * BRICK_WIDTH, BRICK_Y - 88.0f);
-		objects.push_back(b);
+	//for (int i = 0; i < 50; i++)
+	//{
+	//	CBrick* b = new CBrick(BRICK_X + 132.0f + i * BRICK_WIDTH, BRICK_Y - 88.0f);
+	//	objects.push_back(b);
+	//}
+
+	/// GOOMBA 
+	LPTEXTURE texEnemy = textures->Get(ID_TEX_ENEMY);
+	
+	sprites->Add(ID_SPRITE_GOOMBA + 1, 5, 14, 21, 29, texEnemy);  // walk 1
+	sprites->Add(ID_SPRITE_GOOMBA + 2, 25, 14, 41, 29, texEnemy); // walk 2
+
+	sprites->Add(ID_SPRITE_GOOMBA + 3, 45, 21, 61, 29, texEnemy); // die
+
+	ani = new CAnimation(100);
+	ani->Add(ID_SPRITE_GOOMBA + 1);
+	ani->Add(ID_SPRITE_GOOMBA + 2);
+	animations->Add(ID_ANI_GOOMBA_WALKING, ani);
+
+	ani = new CAnimation(100);
+	ani->Add(ID_SPRITE_GOOMBA + 3);
+	animations->Add(ID_ANI_GOOMBA_DIE, ani);
+
+	for (int j=0;j<4;j++)
+	{ 
+		CGoomba *goomba = new CGoomba(200.0f + j*30, 30.0f);
+		objects.push_back(goomba);
 	}
 }
 
@@ -263,7 +288,6 @@ void Update(DWORD dt)
 	{
 		objects[i]->Update(dt,&coObjects);
 	}
-
 
 	// Update camera to follow mario
 	float cx, cy;

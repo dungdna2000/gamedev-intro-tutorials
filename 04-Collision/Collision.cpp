@@ -271,5 +271,16 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 		objSrc->SetPosition(x, y);
 	}
 
+	//
+	// Scan all collisions for further collision logic
+	//
+	for (UINT i = 0; i < coEventsResult.size(); i++)
+	{
+		LPCOLLISIONEVENT e = coEventsResult[i];
+		if (e->isDeleted) continue; 
+		objSrc->OnCollisionWith(e);			
+	}
+
+
 	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
 }
