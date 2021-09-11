@@ -13,16 +13,11 @@ CGameObject::CGameObject()
 	x = y = 0;
 	vx = vy = 0;
 	nx = 1;	
-	dt = 0;
-	dx = dy = 0;
 	state = -1;
 }
 
 void CGameObject::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
-	this->dt = dt;
-	dx = vx*dt;
-	dy = vy*dt;
 }
 
 void CGameObject::RenderBoundingBox()

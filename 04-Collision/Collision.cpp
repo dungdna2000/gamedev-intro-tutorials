@@ -113,29 +113,30 @@ void CCollision::SweptAABB(
 /*
 	Extension of original SweptAABB to deal with two moving objects
 */
-LPCOLLISIONEVENT CCollision::SweptAABBEx(LPGAMEOBJECT objSrc, LPGAMEOBJECT objDest)
+LPCOLLISIONEVENT CCollision::SweptAABB(LPGAMEOBJECT objSrc, DWORD dt, LPGAMEOBJECT objDest)
 {
 	float sl, st, sr, sb;		// static object bbox
 	float ml, mt, mr, mb;		// moving object bbox
 	float t, nx, ny;
 
-	DWORD dt = objSrc->dt;
-	float src_dx = objSrc->dx;
-	float src_dy = objSrc->dy;
+	float mvx, mvy;
+	objSrc->GetSpeed(mvx, mvy);
+	float mdx = mvx * dt;
+	float mdy = mvy * dt;
 
-	objDest->GetBoundingBox(sl, st, sr, sb);
-
-	// deal with moving object: m speed = original m speed - collide object speed
 	float svx, svy;
 	objDest->GetSpeed(svx, svy);
-
 	float sdx = svx * dt;
 	float sdy = svy * dt;
 
-	float dx = src_dx - sdx;
-	float dy = src_dy - sdy;
+	//
+	// NOTE: new m speed = original m speed - collide object speed
+	// 
+	float dx = mdx - sdx;
+	float dy = mdy - sdy;
 
 	objSrc->GetBoundingBox(ml, mt, mr, mb);
+	objDest->GetBoundingBox(sl, st, sr, sb);
 
 	SweptAABB(
 		ml, mt, mr, mb,
@@ -148,18 +149,17 @@ LPCOLLISIONEVENT CCollision::SweptAABBEx(LPGAMEOBJECT objSrc, LPGAMEOBJECT objDe
 	return e;
 }
 
-
 /*
 	Calculate potential collisions with the list of colliable objects
 
 	coObjects: the list of colliable objects
 	coEvents: list of potential collisions
 */
-void CCollision::Scan(LPGAMEOBJECT objSrc, vector<LPGAMEOBJECT>* objDests, vector<LPCOLLISIONEVENT>& coEvents)
+void CCollision::Scan(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* objDests, vector<LPCOLLISIONEVENT>& coEvents)
 {
 	for (UINT i = 0; i < objDests->size(); i++)
 	{
-		LPCOLLISIONEVENT e = SweptAABBEx(objSrc, objDests->at(i));
+		LPCOLLISIONEVENT e = SweptAABB(objSrc, dt, objDests->at(i));
 
 		if (e->t > 0 && e->t <= 1.0f)
 			coEvents.push_back(e);

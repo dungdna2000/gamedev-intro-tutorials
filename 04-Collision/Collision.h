@@ -60,8 +60,15 @@ public:
 		float& nx,
 		float& ny);
 
-	LPCOLLISIONEVENT SweptAABBEx(LPGAMEOBJECT objSrc, LPGAMEOBJECT objDest); 
-	void Scan(LPGAMEOBJECT objSrc, vector<LPGAMEOBJECT>* objDests, vector<LPCOLLISIONEVENT>& coEvents);
+	LPCOLLISIONEVENT SweptAABB(
+		LPGAMEOBJECT objSrc, 
+		DWORD dt,
+		LPGAMEOBJECT objDest); 
+	void Scan(
+		LPGAMEOBJECT objSrc, 
+		DWORD dt, 
+		vector<LPGAMEOBJECT>* objDests, 
+		vector<LPCOLLISIONEVENT>& coEvents);
 	void Filter(
 		LPGAMEOBJECT objSrc,
 		vector<LPCOLLISIONEVENT>& coEvents,

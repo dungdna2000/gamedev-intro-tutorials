@@ -15,13 +15,10 @@ using namespace std;
 
 class CGameObject
 {
-public:
+protected:
 
 	float x; 
 	float y;
-
-	float dx;	// dx = vx*dt
-	float dy;	// dy = vy*dt
 
 	float vx;
 	float vy;
@@ -29,8 +26,6 @@ public:
 	int nx;	 
 
 	int state;
-
-	DWORD dt; 
 
 	vector<LPANIMATION> animations;
 

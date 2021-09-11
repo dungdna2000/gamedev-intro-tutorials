@@ -17,8 +17,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	if (abs(vx) > abs(maxVx)) vx = maxVx;
 
-	// Calculate dx, dy 
-	CGameObject::Update(dt);
+	float dx = vx * dt;
+	float dy = vy * dt;
 
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
@@ -29,7 +29,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	// turn off collision when die 
 	if (state!=MARIO_STATE_DIE)
-		coll->Scan(this, coObjects, coEvents);
+		coll->Scan(this, dt, coObjects, coEvents);
 
 	// reset untouchable timer if untouchable time has passed
 	if ( GetTickCount64() - untouchable_start > MARIO_UNTOUCHABLE_TIME) 
