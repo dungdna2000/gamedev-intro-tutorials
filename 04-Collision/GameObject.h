@@ -27,8 +27,6 @@ protected:
 
 	int state;
 
-	vector<LPANIMATION> animations;
-
 public: 
 	void SetPosition(float x, float y) { this->x = x, this->y = y; }
 	void SetSpeed(float vx, float vy) { this->vx = vx, this->vy = vy; }
@@ -39,17 +37,18 @@ public:
 
 	void RenderBoundingBox();
 
-	void AddAnimation(int aniId);
-
 	CGameObject();
 	CGameObject(float x, float y) :CGameObject() { this->x = x; this->y = y; }
 
 
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom) = 0;
-	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects = NULL);
+	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects = NULL) {};
 	virtual void Render() = 0;
 	virtual void SetState(int state) { this->state = state; }
 
+	virtual int IsCollidable() { return 0; };
+	virtual void OnNoCollision(DWORD dt) {};
+	virtual void OnCollisionWith(LPCOLLISIONEVENT e) {};
 
 	~CGameObject();
 };

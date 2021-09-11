@@ -16,10 +16,6 @@ CGameObject::CGameObject()
 	state = -1;
 }
 
-void CGameObject::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
-{
-}
-
 void CGameObject::RenderBoundingBox()
 {
 	D3DXVECTOR3 p(x, y, 0);
@@ -40,13 +36,6 @@ void CGameObject::RenderBoundingBox()
 
 	CGame::GetInstance()->Draw(x - cx, y - cy, bbox, rect.left, rect.top, rect.right, rect.bottom, 0.25f);
 }
-
-void CGameObject::AddAnimation(int aniId)
-{
-	LPANIMATION ani = CAnimations::GetInstance()->Get(aniId);
-	animations.push_back(ani);
-}
-
 
 CGameObject::~CGameObject()
 {

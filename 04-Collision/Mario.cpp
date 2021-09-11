@@ -8,7 +8,7 @@
 
 #include "Collision.h"
 
-#define BLOCK_PUSH_FACTOR 0.4f
+//#define BLOCK_PUSH_FACTOR 0.4f
 
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
@@ -16,20 +16,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	vx += ax * dt;
 
 	if (abs(vx) > abs(maxVx)) vx = maxVx;
-
-	float dx = vx * dt;
-	float dy = vy * dt;
-
-	vector<LPCOLLISIONEVENT> coEvents;
-	vector<LPCOLLISIONEVENT> coEventsResult;
-
-	coEvents.clear();
-
-	CCollision *coll = CCollision::GetInstance();
-
-	// turn off collision when die 
-	if (state!=MARIO_STATE_DIE)
-		coll->Scan(this, dt, coObjects, coEvents);
 
 	// reset untouchable timer if untouchable time has passed
 	if ( GetTickCount64() - untouchable_start > MARIO_UNTOUCHABLE_TIME) 
@@ -40,70 +26,88 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	isOnPlatform = false;
 
+	CCollision::GetInstance()->Process(this, dt, coObjects);
+
 	// No collision occured, proceed normally
-	if (coEvents.size()==0)
-	{
-		x += dx; 
-		y += dy;
-	}
-	else
-	{
-		float min_tx, min_ty, nx = 0, ny;
+	//if (coEvents.size()==0)
+	//{
+	//	x += dx; 
+	//	y += dy;
+	//}
+	//else
+	//{
+	//	float min_tx, min_ty, nx = 0, ny;
 
-		coll->Filter(this, coEvents, coEventsResult, min_tx, min_ty, nx, ny);
+	//	coll->Filter(this, coEvents, coEventsResult, min_tx, min_ty, nx, ny);
 
-		// TEMPORARY *NOT GOOD* LOGIC: everthing blocks Mario. 
-		// This logic has to be changed later based on the real game logic
-		x += min_tx*dx + nx*BLOCK_PUSH_FACTOR;		// need to push out a bit to avoid overlapping next frame
-		y += min_ty*dy + ny*BLOCK_PUSH_FACTOR;
-		
-		if (ny != 0)
-		{
-			vy = 0;
-			if (ny < 0) isOnPlatform = true;
-		}
+	//	// TEMPORARY *NOT GOOD* LOGIC: everthing blocks Mario. 
+	//	// This logic has to be changed later based on the real game logic
+	//	x += min_tx*dx + nx*BLOCK_PUSH_FACTOR;		// need to push out a bit to avoid overlapping next frame
+	//	y += min_ty*dy + ny*BLOCK_PUSH_FACTOR;
+	//	
+	//	if (ny != 0)
+	//	{
+	//		vy = 0;
+	//		if (ny < 0) isOnPlatform = true;
+	//	}
 
-		// Collision logic with Goombas
-		for (UINT i = 0; i < coEventsResult.size(); i++)
-		{
-			LPCOLLISIONEVENT e = coEventsResult[i];
+	//	// Collision logic with Goombas
+	//	//for (UINT i = 0; i < coEventsResult.size(); i++)
+	//	//{
+	//	//	LPCOLLISIONEVENT e = coEventsResult[i];
 
-			if (dynamic_cast<CGoomba *>(e->obj)) // if e->obj is Goomba 
-			{
-				CGoomba *goomba = dynamic_cast<CGoomba *>(e->obj);
+	//	//	if (dynamic_cast<CGoomba *>(e->obj)) // if e->obj is Goomba 
+	//	//	{
+	//	//		CGoomba *goomba = dynamic_cast<CGoomba *>(e->obj);
 
-				// jump on top >> kill Goomba and deflect a bit 
-				if (e->ny < 0)
-				{
-					if (goomba->GetState()!= GOOMBA_STATE_DIE)
-					{
-						goomba->SetState(GOOMBA_STATE_DIE);
-						vy = -MARIO_JUMP_DEFLECT_SPEED;
-					}
-				}
-				else if (e->nx != 0)
-				{
-					if (untouchable==0)
-					{
-						if (goomba->GetState()!=GOOMBA_STATE_DIE)
-						{
-							if (level > MARIO_LEVEL_SMALL)
-							{
-								level = MARIO_LEVEL_SMALL;
-								StartUntouchable();
-							}
-							else 
-								SetState(MARIO_STATE_DIE);
-						}
-					}
-				}
-			}
-		}
-	}
+	//	//		// jump on top >> kill Goomba and deflect a bit 
+	//	//		if (e->ny < 0)
+	//	//		{
+	//	//			if (goomba->GetState()!= GOOMBA_STATE_DIE)
+	//	//			{
+	//	//				goomba->SetState(GOOMBA_STATE_DIE);
+	//	//				vy = -MARIO_JUMP_DEFLECT_SPEED;
+	//	//			}
+	//	//		}
+	//	//		else if (e->nx != 0)
+	//	//		{
+	//	//			if (untouchable==0)
+	//	//			{
+	//	//				if (goomba->GetState()!=GOOMBA_STATE_DIE)
+	//	//				{
+	//	//					if (level > MARIO_LEVEL_SMALL)
+	//	//					{
+	//	//						level = MARIO_LEVEL_SMALL;
+	//	//						StartUntouchable();
+	//	//					}
+	//	//					else 
+	//	//						SetState(MARIO_STATE_DIE);
+	//	//				}
+	//	//			}
+	//	//		}
+	//	//	}
+	//	//}
+	//}
 
-	// clean up collision events
-	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
+	//// clean up collision events
+	//for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
 }
+
+void CMario::OnNoCollision(DWORD dt)
+{
+	x += vx * dt;
+	y += vy * dt;
+}
+
+void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
+{
+	if (e->ny != 0)
+	{
+		vy = 0;
+		if (e->ny < 0) isOnPlatform = true;
+	}
+}
+
 
 void CMario::Render()
 {

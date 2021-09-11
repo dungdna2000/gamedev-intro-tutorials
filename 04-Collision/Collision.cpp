@@ -1,7 +1,11 @@
 #include "Collision.h"
 #include "GameObject.h"
 
+#include "debug.h"
+
 CCollision* CCollision::__instance = NULL;
+
+#define BLOCK_PUSH_FACTOR 0.4f
 
 CCollision* CCollision::GetInstance()
 {
@@ -174,9 +178,11 @@ void CCollision::Filter(
 	LPGAMEOBJECT objSrc,
 	vector<LPCOLLISIONEVENT>& coEvents,
 	vector<LPCOLLISIONEVENT>& coEventsResult,
-	float& min_tx, float& min_ty,
-	float& nx, float& ny)
+	LPCOLLISIONEVENT &colX,
+	LPCOLLISIONEVENT &colY)
 {
+	float min_tx, min_ty, nx, ny;
+
 	min_tx = 1.0f;
 	min_ty = 1.0f;
 	int min_ix = -1;
@@ -200,6 +206,70 @@ void CCollision::Filter(
 		}
 	}
 
-	if (min_ix >= 0) coEventsResult.push_back(coEvents[min_ix]);
-	if (min_iy >= 0) coEventsResult.push_back(coEvents[min_iy]);
+	if (min_ix >= 0) colX = coEvents[min_ix];
+	if (min_iy >= 0) colY = coEvents[min_iy];
+}
+
+/*
+* Collision framework 
+*/
+void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* coObjects)
+{
+	vector<LPCOLLISIONEVENT> coEvents;
+	vector<LPCOLLISIONEVENT> coEventsResult;
+	LPCOLLISIONEVENT colX = NULL; 
+	LPCOLLISIONEVENT colY = NULL;
+
+	coEvents.clear();
+
+	if (objSrc->IsCollidable())
+	{
+		Scan(objSrc, dt, coObjects, coEvents);
+	}
+
+	// No collision detected
+	if (coEvents.size() == 0)
+	{
+		objSrc->OnNoCollision(dt);
+	}
+	else
+	{
+		Filter(objSrc, coEvents, coEventsResult, colX, colY);
+
+		// WARNING: *NOT GOOD* LOGIC: every collision blocks 
+		// TODO: Have to improve this logic later based on the real game logic
+
+		float x, y, vx, vy, dx, dy;
+		objSrc->GetPosition(x, y);
+		objSrc->GetSpeed(vx, vy);
+		dx = vx * dt;
+		dy = vy * dt;
+
+		if (colX != NULL && colY != NULL) 
+		{
+			x += colX->t * dx + colX->nx * BLOCK_PUSH_FACTOR;
+			objSrc->OnCollisionWith(colX);
+
+			y += colY->t * dy + colY->ny * BLOCK_PUSH_FACTOR;
+			objSrc->OnCollisionWith(colY);
+		}
+		else 
+		if (colX != NULL)
+		{
+			x += colX->t * dx + colX->nx * BLOCK_PUSH_FACTOR;
+			y += dy;
+			objSrc->OnCollisionWith(colX);
+		}
+		else 
+			if (colY != NULL)
+			{
+				x += dx;
+				y += colY->t * dy + colY->ny * BLOCK_PUSH_FACTOR;
+				objSrc->OnCollisionWith(colY);
+			}
+
+		objSrc->SetPosition(x, y);
+	}
+
+	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
 }

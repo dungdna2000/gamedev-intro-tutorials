@@ -18,14 +18,14 @@ void CGoomba::GetBoundingBox(float &left, float &top, float &right, float &botto
 	}
 }
 
+void CGoomba::OnNoCollision(DWORD dt)
+{
+	x += vx * dt;
+	y += vy * dt;
+};
+
 void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
-	//CGameObject::Update(dt, coObjects);
-
-	//
-	// TO-DO: make sure Goomba can interact with the world and to each of them too!
-	// 
-
 	float dx = vx * dt;
 	float dy = vy * dt;
 
@@ -48,7 +48,7 @@ void CGoomba::Render()
 		ani = GOOMBA_ANI_DIE;
 	}
 
-	animations[ani]->Render(x,y);
+	//animations[ani]->Render(x,y);
 	RenderBoundingBox();
 }
 

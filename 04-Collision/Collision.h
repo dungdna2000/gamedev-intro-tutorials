@@ -69,14 +69,15 @@ public:
 		DWORD dt, 
 		vector<LPGAMEOBJECT>* objDests, 
 		vector<LPCOLLISIONEVENT>& coEvents);
+
 	void Filter(
 		LPGAMEOBJECT objSrc,
 		vector<LPCOLLISIONEVENT>& coEvents,
 		vector<LPCOLLISIONEVENT>& coEventsResult,
-		float& min_tx,
-		float& min_ty,
-		float& nx,
-		float& ny);
+		LPCOLLISIONEVENT &colX,
+		LPCOLLISIONEVENT &colY);
+
+	void Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 
 	static CCollision* GetInstance();
 };

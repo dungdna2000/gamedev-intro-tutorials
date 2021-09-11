@@ -110,6 +110,14 @@ public:
 	void Render();
 	void SetState(int state);
 
+	int IsCollidable()
+	{ 
+		return (state != MARIO_STATE_DIE); 
+	}
+
+	void OnNoCollision(DWORD dt);
+	void OnCollisionWith(LPCOLLISIONEVENT e);
+
 	void SetLevel(int l) { level = l; }
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount64(); }
 
