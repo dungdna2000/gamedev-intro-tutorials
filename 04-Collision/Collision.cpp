@@ -172,32 +172,30 @@ void CCollision::Scan(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* objDe
 	std::sort(coEvents.begin(), coEvents.end(), CCollisionEvent::compare);
 }
 
-void CCollision::Filter(
-	LPGAMEOBJECT objSrc,
+void CCollision::Filter( LPGAMEOBJECT objSrc,
 	vector<LPCOLLISIONEVENT>& coEvents,
 	LPCOLLISIONEVENT &colX,
-	LPCOLLISIONEVENT &colY)
+	LPCOLLISIONEVENT &colY,
+	int filterX = 1,			// process collision events on X-axis? 
+	int filterY = 1)			// process collision events on Y-axis?
 {
-	float min_tx, min_ty, nx, ny;
+	float min_tx, min_ty;
 
 	min_tx = 1.0f;
 	min_ty = 1.0f;
 	int min_ix = -1;
 	int min_iy = -1;
 
-	nx = 0.0f;
-	ny = 0.0f;
-
 	for (UINT i = 0; i < coEvents.size(); i++)
 	{
 		LPCOLLISIONEVENT c = coEvents[i];
 
-		if (c->t < min_tx && c->nx != 0) {
-			min_tx = c->t; nx = c->nx; min_ix = i;
+		if (c->t < min_tx && c->nx != 0 && filterX==1) {
+			min_tx = c->t; min_ix = i;
 		}
 
-		if (c->t < min_ty && c->ny != 0) {
-			min_ty = c->t; ny = c->ny; min_iy = i;
+		if (c->t < min_ty && c->ny != 0 && filterY == 1) {
+			min_ty = c->t; min_iy = i;
 		}
 	}
 

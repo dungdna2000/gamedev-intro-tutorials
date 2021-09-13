@@ -74,7 +74,9 @@ public:
 		LPGAMEOBJECT objSrc,
 		vector<LPCOLLISIONEVENT>& coEvents,
 		LPCOLLISIONEVENT &colX,
-		LPCOLLISIONEVENT &colY);
+		LPCOLLISIONEVENT &colY, 
+		int filterX,
+		int filterY);
 
 	void Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 
