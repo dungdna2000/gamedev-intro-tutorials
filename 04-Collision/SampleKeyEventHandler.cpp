@@ -6,6 +6,7 @@
 #include "Mario.h"
 
 extern CMario* mario;
+extern void Reload();
 
 void CSampleKeyHandler::OnKeyDown(int KeyCode)
 {
@@ -19,10 +20,7 @@ void CSampleKeyHandler::OnKeyDown(int KeyCode)
 		mario->SetState(MARIO_STATE_JUMP);
 		break;
 	case DIK_R: // reset
-		mario->SetState(MARIO_STATE_IDLE);
-		mario->SetLevel(MARIO_LEVEL_BIG);
-		mario->SetPosition(50.0f, 0.0f);
-		mario->SetSpeed(0, 0);
+		Reload();
 		break;
 	}
 }

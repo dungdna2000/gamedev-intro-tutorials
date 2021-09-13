@@ -82,6 +82,7 @@ void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 void CMario::OnCollisionWithCoin(LPCOLLISIONEVENT e)
 {
 	e->obj->Delete();
+	coin++;
 }
 
 void CMario::Render()
@@ -144,6 +145,7 @@ void CMario::Render()
 	animations->Get(aniId)->Render(x, y);
 
 	RenderBoundingBox();
+	DebugOutTitle(L"Coins: %d", coin);
 }
 
 void CMario::SetState(int state)

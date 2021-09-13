@@ -21,6 +21,7 @@
 #include <windows.h>
 #include <d3d10.h>
 #include <d3dx10.h>
+#include <list>
 
 #include "debug.h"
 #include "Game.h"
@@ -32,6 +33,7 @@
 #include "Mario.h"
 #include "Brick.h"
 #include "Goomba.h"
+#include "Coin.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -59,6 +61,7 @@
 
 #define ID_SPRITE_BRICK 20001
 #define ID_SPRITE_GOOMBA 30000
+#define ID_SPRITE_COIN 40000
 
 #define BRICK_X 0.0f
 #define BRICK_Y GROUND_Y + 20.0f
@@ -70,7 +73,7 @@ CGame *game;
 CMario *mario;
 CGoomba *goomba;
 
-vector<LPGAMEOBJECT> objects;
+list<LPGAMEOBJECT> objects;
 
 CSampleKeyHandler * keyHandler; 
 
@@ -101,7 +104,6 @@ void LoadResources()
 	textures->Add(ID_TEX_ENEMY, TEXTURE_PATH_ENEMY);
 	textures->Add(ID_TEX_MISC, TEXTURE_PATH_MISC);
 	textures->Add(ID_TEX_BBOX, TEXTURE_PATH_BBOX);
-
 
 	CSprites * sprites = CSprites::GetInstance();
 	CAnimations * animations = CAnimations::GetInstance();
@@ -143,6 +145,8 @@ void LoadResources()
 	// BRACING RIGHT/LEFT
 	sprites->Add(10061, 425, 154, 425 + 15, 154 + 27, texMario);
 	sprites->Add(10062, 5, 154, 5 + 15, 154 + 27, texMario);
+
+
 
 	LPANIMATION ani;
 
@@ -210,16 +214,6 @@ void LoadResources()
 	ani->Add(10062);
 	animations->Add(ID_ANI_MARIO_BRACE_LEFT, ani);
 
-
-
-
-
-	//for (int i = 0; i < 50; i++)
-	//{
-	//	CBrick* b = new CBrick(BRICK_X + 132.0f + i * BRICK_WIDTH, BRICK_Y - 88.0f);
-	//	objects.push_back(b);
-	//}
-
 	/// GOOMBA 
 	LPTEXTURE texEnemy = textures->Get(ID_TEX_ENEMY);
 	
@@ -237,17 +231,31 @@ void LoadResources()
 	ani->Add(ID_SPRITE_GOOMBA + 3);
 	animations->Add(ID_ANI_GOOMBA_DIE, ani);
 
-	/// <summary>
-	///  SCENE OBJECTS
-	/// </summary>
-
 	// Brick 
 	LPTEXTURE texMisc = textures->Get(ID_TEX_MISC);
 	sprites->Add(ID_SPRITE_BRICK, 372, 153, 372 + 15, 153 + 15, texMisc);
 
+	// Coin
+	sprites->Add(ID_SPRITE_COIN + 1, 303, 99, 303 + 9, 99 + 15, texMisc);
+	sprites->Add(ID_SPRITE_COIN + 2, 321, 99, 321 + 9, 99 + 15, texMisc);
+	sprites->Add(ID_SPRITE_COIN + 3, 338, 99, 338 + 9, 99 + 15, texMisc);
+
+
 	ani = new CAnimation(100);
 	ani->Add(ID_SPRITE_BRICK);
 	animations->Add(ID_ANI_BRICK, ani);
+
+
+	ani = new CAnimation(300);
+	ani->Add(ID_SPRITE_COIN + 1);
+	ani->Add(ID_SPRITE_COIN + 2);
+	ani->Add(ID_SPRITE_COIN + 3);
+	animations->Add(ID_ANI_COIN, ani);
+}
+
+void Reload()
+{
+	objects.clear();
 
 	for (int i = 0; i < NUM_BRICKS; i++)
 	{
@@ -276,12 +284,23 @@ void LoadResources()
 	mario = new CMario(MARIO_START_X, MARIO_START_Y);
 	objects.push_back(mario);
 
-	for (int j=0;j<1;j++)
-	{ 
-		CGoomba *goomba = new CGoomba(100.0f + j*30, 30.0f);
+	for (int j = 0; j < 6; j++)
+	{
+		CGoomba* goomba = new CGoomba(100.0f + j * 60, 30.0f);
 		objects.push_back(goomba);
 	}
+
+	// COINS 
+	for (int i = 0; i < 10; i++)
+	{
+		CCoin* c = new CCoin(100.0f + i * (COIN_WIDTH * 2), BRICK_Y - 70.0f);
+		objects.push_back(c);
+	}
 }
+
+
+
+bool IsGameObjectDeleted(const LPGAMEOBJECT& o) { return o->IsDeleted(); }
 
 /*
 	Update world status for this frame
@@ -291,17 +310,21 @@ void Update(DWORD dt)
 {
 	// We know that Mario is the first object in the list hence we won't add him into the colliable object list
 	// TO-DO: This is a "dirty" way, need a more organized way 
-
 	vector<LPGAMEOBJECT> coObjects;
-	for (int i = 1; i < objects.size(); i++)
+	list<LPGAMEOBJECT>::iterator i;
+	for (i = objects.begin(); i != objects.end(); ++i)
 	{
-		coObjects.push_back(objects[i]);
+		coObjects.push_back(*i);
 	}
 
-	for (int i = 0; i < objects.size(); i++)
+	for (i = objects.begin(); i != objects.end(); ++i)
 	{
-		objects[i]->Update(dt,&coObjects);
+		(*i)->Update(dt,&coObjects);
 	}
+
+	objects.erase(
+		std::remove_if(objects.begin(), objects.end(), IsGameObjectDeleted), 
+		objects.end());
 
 	// Update camera to follow mario
 	float cx, cy;
@@ -332,10 +355,16 @@ void Render()
 	FLOAT NewBlendFactor[4] = { 0,0,0,0 };
 	pD3DDevice->OMSetBlendState(g->GetAlphaBlending(), NewBlendFactor, 0xffffffff);
 
-	for (int i = 0; i < objects.size(); i++)
+	list<LPGAMEOBJECT>::iterator i;
+	for (i = objects.begin(); i != objects.end(); ++i)
 	{
-		objects[i]->Render();
+		(*i)->Render();
 	}
+
+	//for (int i = 0; i < objects.size(); i++)
+	//{
+	//	objects[i]->Render();
+	//}
 
 	spriteHandler->End();
 	pSwapChain->Present(0, 0);
@@ -443,6 +472,7 @@ int WINAPI WinMain(
 	game->InitKeyboard(keyHandler);
 
 	LoadResources();
+	Reload();
 
 	SetWindowPos(hWnd, 0, 0, 0, SCREEN_WIDTH*2, SCREEN_HEIGHT*2, SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
 

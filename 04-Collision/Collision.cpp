@@ -248,7 +248,7 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 		{
 			if (colY->t < colX->t)	// was collision on Y first ?
 			{
-				y += colY->t * dy;
+				y += colY->t * dy + colY->ny * 0.001f;
 				objSrc->SetPosition(x, y);
 
 				objSrc->OnCollisionWith(colY);
