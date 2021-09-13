@@ -73,7 +73,6 @@ public:
 	void Filter(
 		LPGAMEOBJECT objSrc,
 		vector<LPCOLLISIONEVENT>& coEvents,
-		vector<LPCOLLISIONEVENT>& coEventsResult,
 		LPCOLLISIONEVENT &colX,
 		LPCOLLISIONEVENT &colY);
 

@@ -5,8 +5,6 @@
 
 CCollision* CCollision::__instance = NULL;
 
-#define BLOCK_PUSH_FACTOR 0.4f
-
 CCollision* CCollision::GetInstance()
 {
 	if (__instance == NULL) __instance = new CCollision();
@@ -165,7 +163,7 @@ void CCollision::Scan(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* objDe
 	{
 		LPCOLLISIONEVENT e = SweptAABB(objSrc, dt, objDests->at(i));
 
-		if (e->t > 0 && e->t <= 1.0f)
+		if (e->t >= 0 && e->t <= 1.0f)
 			coEvents.push_back(e);
 		else
 			delete e;
@@ -177,7 +175,6 @@ void CCollision::Scan(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* objDe
 void CCollision::Filter(
 	LPGAMEOBJECT objSrc,
 	vector<LPCOLLISIONEVENT>& coEvents,
-	vector<LPCOLLISIONEVENT>& coEventsResult,
 	LPCOLLISIONEVENT &colX,
 	LPCOLLISIONEVENT &colY)
 {
@@ -190,8 +187,6 @@ void CCollision::Filter(
 
 	nx = 0.0f;
 	ny = 0.0f;
-
-	coEventsResult.clear();
 
 	for (UINT i = 0; i < coEvents.size(); i++)
 	{
@@ -211,7 +206,8 @@ void CCollision::Filter(
 }
 
 /*
-* Collision framework 
+*  Simple/Sample collision framework 
+*  NOTE: Student needs to improve this based on game logic 
 */
 void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
@@ -234,10 +230,11 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 	}
 	else
 	{
-		Filter(objSrc, coEvents, coEventsResult, colX, colY);
+		Filter(objSrc, coEvents, colX, colY);
 
 		// WARNING: *NOT GOOD* LOGIC: every collision blocks 
 		// TODO: Have to improve this logic later based on the real game logic
+		// For example: collision with items like coins, mushrooms do not block
 
 		float x, y, vx, vy, dx, dy;
 		objSrc->GetPosition(x, y);
@@ -247,16 +244,16 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 
 		if (colX != NULL && colY != NULL) 
 		{
-			x += colX->t * dx + colX->nx * BLOCK_PUSH_FACTOR;
+			x += colX->t * dx; 
 			objSrc->OnCollisionWith(colX);
 
-			y += colY->t * dy + colY->ny * BLOCK_PUSH_FACTOR;
+			y += colY->t * dy; 
 			objSrc->OnCollisionWith(colY);
 		}
-		else 
+		else
 		if (colX != NULL)
 		{
-			x += colX->t * dx + colX->nx * BLOCK_PUSH_FACTOR;
+			x += colX->t * dx; 
 			y += dy;
 			objSrc->OnCollisionWith(colX);
 		}
@@ -264,7 +261,7 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 			if (colY != NULL)
 			{
 				x += dx;
-				y += colY->t * dy + colY->ny * BLOCK_PUSH_FACTOR;
+				y += colY->t * dy; 
 				objSrc->OnCollisionWith(colY);
 			}
 
@@ -274,12 +271,12 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 	//
 	// Scan all collisions for further collision logic
 	//
-	for (UINT i = 0; i < coEventsResult.size(); i++)
-	{
-		LPCOLLISIONEVENT e = coEventsResult[i];
-		if (e->isDeleted) continue; 
-		objSrc->OnCollisionWith(e);			
-	}
+	//for (UINT i = 0; i < coEventsResult.size(); i++)
+	//{
+	//	LPCOLLISIONEVENT e = coEventsResult[i];
+	//	if (e->isDeleted) continue; 
+	//	objSrc->OnCollisionWith(e);			
+	//}
 
 
 	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
