@@ -1,6 +1,5 @@
 #include "Goomba.h"
 
-
 CGoomba::CGoomba(float x, float y):CGameObject(x, y)
 {
 	this->ax = 0;
@@ -57,7 +56,8 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 void CGoomba::Render()
 {
 	int aniId = ID_ANI_GOOMBA_WALKING;
-	if (state == GOOMBA_STATE_DIE) {
+	if (state == GOOMBA_STATE_DIE) 
+	{
 		aniId = ID_ANI_GOOMBA_DIE;
 	}
 
