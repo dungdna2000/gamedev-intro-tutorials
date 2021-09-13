@@ -1,4 +1,5 @@
 #include "Animation.h"
+#include "debug.h"
 
 void CAnimation::Add(int spriteId, DWORD time)
 {
@@ -6,6 +7,9 @@ void CAnimation::Add(int spriteId, DWORD time)
 	if (time == 0) t = this->defaultTime;
 
 	LPSPRITE sprite = CSprites::GetInstance()->Get(spriteId);
+	if (sprite == NULL)
+		DebugOut(L"Sprite ID %d not found!\n", spriteId);
+
 	LPANIMATION_FRAME frame = new CAnimationFrame(sprite, t);
 	frames.push_back(frame);
 }

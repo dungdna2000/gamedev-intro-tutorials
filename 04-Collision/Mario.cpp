@@ -5,6 +5,7 @@
 #include "Game.h"
 
 #include "Goomba.h"
+#include "Coin.h"
 
 #include "Collision.h"
 
@@ -35,44 +36,53 @@ void CMario::OnNoCollision(DWORD dt)
 
 void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
 {
-	if (e->ny != 0)
+	if (e->ny != 0 && e->obj->IsBlocking())
 	{
 		vy = 0;
 		if (e->ny < 0) isOnPlatform = true;
 	}
 
-	if (dynamic_cast<CGoomba*>(e->obj))  
-	{
-		CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
+	if (dynamic_cast<CGoomba*>(e->obj))
+		OnCollisionWithGoomba(e);
+	else if (dynamic_cast<CCoin*>(e->obj))
+		OnCollisionWithCoin(e);
+}
 
-		// jump on top >> kill Goomba and deflect a bit 
-		if (e->ny < 0)
+void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
+{
+	CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
+
+	// jump on top >> kill Goomba and deflect a bit 
+	if (e->ny < 0)
+	{
+		if (goomba->GetState() != GOOMBA_STATE_DIE)
+		{
+			goomba->SetState(GOOMBA_STATE_DIE);
+			vy = -MARIO_JUMP_DEFLECT_SPEED;
+		}
+	}
+	else if (e->nx != 0)
+	{
+		if (untouchable == 0)
 		{
 			if (goomba->GetState() != GOOMBA_STATE_DIE)
 			{
-				goomba->SetState(GOOMBA_STATE_DIE);
-				vy = -MARIO_JUMP_DEFLECT_SPEED;
-			}
-		}
-		else if (e->nx != 0)
-		{
-			if (untouchable == 0)
-			{
-				if (goomba->GetState() != GOOMBA_STATE_DIE)
+				if (level > MARIO_LEVEL_SMALL)
 				{
-					if (level > MARIO_LEVEL_SMALL)
-					{
-						level = MARIO_LEVEL_SMALL;
-						StartUntouchable();
-					}
-					else
-						SetState(MARIO_STATE_DIE);
+					level = MARIO_LEVEL_SMALL;
+					StartUntouchable();
 				}
+				else
+					SetState(MARIO_STATE_DIE);
 			}
 		}
 	}
 }
 
+void CMario::OnCollisionWithCoin(LPCOLLISIONEVENT e)
+{
+	e->obj->Delete();
+}
 
 void CMario::Render()
 {

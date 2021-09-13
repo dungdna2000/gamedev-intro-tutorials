@@ -93,6 +93,9 @@ class CMario : public CGameObject
 	ULONGLONG untouchable_start;
 	BOOLEAN isOnPlatform;
 
+	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
+	void OnCollisionWithCoin(LPCOLLISIONEVENT e);
+
 public:
 	CMario(float x, float y) : CGameObject(x, y)
 	{

@@ -77,6 +77,7 @@ public:
 		vector<LPCOLLISIONEVENT>& coEvents,
 		LPCOLLISIONEVENT &colX,
 		LPCOLLISIONEVENT &colY, 
+		int filterBlock,		
 		int filterX,
 		int filterY);
 

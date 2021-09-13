@@ -27,6 +27,8 @@ protected:
 
 	int state;
 
+	bool isDeleted; 
+
 public: 
 	void SetPosition(float x, float y) { this->x = x, this->y = y; }
 	void SetSpeed(float vx, float vy) { this->vx = vx, this->vy = vy; }
@@ -34,6 +36,8 @@ public:
 	void GetSpeed(float &vx, float &vy) { vx = this->vx; vy = this->vy; }
 
 	int GetState() { return this->state; }
+	void Delete() { isDeleted = true;  }
+	bool IsDeleted() { return isDeleted; }
 
 	void RenderBoundingBox();
 
@@ -49,6 +53,7 @@ public:
 	virtual int IsCollidable() { return 0; };
 	virtual void OnNoCollision(DWORD dt) {};
 	virtual void OnCollisionWith(LPCOLLISIONEVENT e) {};
+	virtual int IsBlocking() { return 1; }
 
 	~CGameObject();
 };
