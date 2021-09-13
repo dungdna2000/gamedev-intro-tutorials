@@ -189,6 +189,7 @@ void CCollision::Filter( LPGAMEOBJECT objSrc,
 	for (UINT i = 0; i < coEvents.size(); i++)
 	{
 		LPCOLLISIONEVENT c = coEvents[i];
+		if (c->isDeleted) continue;
 
 		if (c->t < min_tx && c->nx != 0 && filterX==1) {
 			min_tx = c->t; min_ix = i;
@@ -242,11 +243,44 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 
 		if (colX != NULL && colY != NULL) 
 		{
-			x += colX->t * dx; 
-			objSrc->OnCollisionWith(colX);
+			if (colY->t < colX->t)	// collision on Y first 
+			{
+				y += colY->t * dy + colY->ny * 0.4f;
+				objSrc->SetPosition(x, y);
 
-			y += colY->t * dy; 
-			objSrc->OnCollisionWith(colY);
+				objSrc->OnCollisionWith(colY);
+
+				// see if after correction on Y, there is still collision on X 
+				LPCOLLISIONEVENT colX_other = NULL;
+				colX_other = SweptAABB(objSrc, dt, colX->obj);
+				if (colX_other->WasCollided() == 0)
+				{
+					delete colX_other; 
+					colX_other = NULL;
+					colX->isDeleted = true;
+					// refilter events on X to see if there is a real collsion
+					Filter(objSrc, coEvents, colX_other, colY, 1, /*filterY=*/0); 
+				}
+
+				if (colX_other != NULL)
+				{
+					x += colX_other->t * dx;
+					objSrc->OnCollisionWith(colX_other);
+					DebugOut(L">> HIT Y 333333 >>\n");
+				}
+				else
+				{
+					x += dx;
+				}
+			}
+			else // collision on X first
+			{
+				x += colX->t * dx;
+				objSrc->OnCollisionWith(colX);
+
+				y += colY->t * dy;
+				objSrc->OnCollisionWith(colY);
+			}
 		}
 		else
 		if (colX != NULL)

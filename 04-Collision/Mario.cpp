@@ -131,9 +131,6 @@ void CMario::Render()
 
 	if (aniId == -1) aniId = ID_ANI_MARIO_IDLE_RIGHT;
 
-	//float d = 0;
-	//if (isSitting) d = MARIO_SIT_HEIGHT_ADJUST;
-
 	animations->Get(aniId)->Render(x, y);
 
 	RenderBoundingBox();

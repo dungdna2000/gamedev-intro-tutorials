@@ -54,7 +54,7 @@
 #define TEXTURE_PATH_ENEMY TEXTURES_DIR "\\enemies.png"
 #define TEXTURE_PATH_BBOX TEXTURES_DIR "\\bbox.png"
 
-#define MARIO_START_X 50.0f
+#define MARIO_START_X 20.0f
 #define MARIO_START_Y 10.0f
 
 #define ID_SPRITE_BRICK 20001
@@ -210,34 +210,9 @@ void LoadResources()
 	ani->Add(10062);
 	animations->Add(ID_ANI_MARIO_BRACE_LEFT, ani);
 
-	mario = new CMario(MARIO_START_X, MARIO_START_Y);
-	objects.push_back(mario);
 
-	// Brick objects 
-	LPTEXTURE texMisc = textures->Get(ID_TEX_MISC);
-	sprites->Add(ID_SPRITE_BRICK, 372, 153, 372+15, 153+15, texMisc);
 
-	ani = new CAnimation(100);
-	ani->Add(ID_SPRITE_BRICK);
-	animations->Add(ID_ANI_BRICK,ani);
 
-	for (int i=0;i<NUM_BRICKS;i++) 
-	{
-		CBrick* b = new CBrick(BRICK_X + i * BRICK_WIDTH, BRICK_Y);
-		objects.push_back(b);
-	}
-
-	for (int i = 0; i < 3; i++)
-	{
-		CBrick* b = new CBrick(BRICK_X + i * BRICK_WIDTH, BRICK_Y - 44.0f);
-		objects.push_back(b);
-	}
-
-	for (int i = 0; i < 5; i++)
-	{
-		CBrick* b = new CBrick(BRICK_X, BRICK_Y - i* BRICK_WIDTH);
-		objects.push_back(b);
-	}
 
 	//for (int i = 0; i < 50; i++)
 	//{
@@ -262,9 +237,48 @@ void LoadResources()
 	ani->Add(ID_SPRITE_GOOMBA + 3);
 	animations->Add(ID_ANI_GOOMBA_DIE, ani);
 
-	for (int j=0;j<4;j++)
+	/// <summary>
+	///  SCENE OBJECTS
+	/// </summary>
+
+	// Brick 
+	LPTEXTURE texMisc = textures->Get(ID_TEX_MISC);
+	sprites->Add(ID_SPRITE_BRICK, 372, 153, 372 + 15, 153 + 15, texMisc);
+
+	ani = new CAnimation(100);
+	ani->Add(ID_SPRITE_BRICK);
+	animations->Add(ID_ANI_BRICK, ani);
+
+	for (int i = 0; i < NUM_BRICKS; i++)
+	{
+		CBrick* b = new CBrick(BRICK_X + i * BRICK_WIDTH, BRICK_Y);
+		objects.push_back(b);
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		CBrick* b = new CBrick(BRICK_X + i * BRICK_WIDTH, BRICK_Y - 44.0f);
+		objects.push_back(b);
+	}
+
+	for (int i = 0; i < 5; i++)
+	{
+		CBrick* b = new CBrick(BRICK_X, BRICK_Y - i * BRICK_WIDTH);
+		objects.push_back(b);
+	}
+
+	for (int i = 1; i < 2; i++)
+	{
+		CBrick* b = new CBrick(BRICK_X + 300.0f, BRICK_Y - i * BRICK_WIDTH);
+		objects.push_back(b);
+	}
+
+	mario = new CMario(MARIO_START_X, MARIO_START_Y);
+	objects.push_back(mario);
+
+	for (int j=0;j<1;j++)
 	{ 
-		CGoomba *goomba = new CGoomba(200.0f + j*30, 30.0f);
+		CGoomba *goomba = new CGoomba(100.0f + j*30, 30.0f);
 		objects.push_back(goomba);
 	}
 }

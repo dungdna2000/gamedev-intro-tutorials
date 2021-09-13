@@ -38,6 +38,10 @@ void CGoomba::OnCollisionWith(LPCOLLISIONEVENT e)
 	{
 		vy = 0;
 	}
+	else if (e->nx != 0)
+	{
+		vx = -vx;
+	}
 }
 
 void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
