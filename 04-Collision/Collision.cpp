@@ -3,6 +3,8 @@
 
 #include "debug.h"
 
+#define BLOCK_PUSH_FACTOR 0.4f
+
 CCollision* CCollision::__instance = NULL;
 
 CCollision* CCollision::GetInstance()
@@ -169,7 +171,7 @@ void CCollision::Scan(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* objDe
 			delete e;
 	}
 
-	std::sort(coEvents.begin(), coEvents.end(), CCollisionEvent::compare);
+	//std::sort(coEvents.begin(), coEvents.end(), CCollisionEvent::compare);
 }
 
 void CCollision::Filter( LPGAMEOBJECT objSrc,
@@ -248,7 +250,7 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 		{
 			if (colY->t < colX->t)	// was collision on Y first ?
 			{
-				y += colY->t * dy + colY->ny * 0.001f;
+				y += colY->t * dy + colY->ny * BLOCK_PUSH_FACTOR;
 				objSrc->SetPosition(x, y);
 
 				objSrc->OnCollisionWith(colY);
@@ -271,7 +273,7 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 
 				if (colX_other != NULL)
 				{
-					x += colX_other->t * dx;
+					x += colX_other->t * dx +colX->nx * BLOCK_PUSH_FACTOR;
 					objSrc->OnCollisionWith(colX_other);
 				}
 				else
@@ -281,17 +283,17 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 			}
 			else // collision on X first
 			{
-				x += colX->t * dx;
+				x += colX->t * dx + colX->nx * BLOCK_PUSH_FACTOR;
 				objSrc->OnCollisionWith(colX);
 
-				y += colY->t * dy;
+				y += colY->t * dy + colY->ny * BLOCK_PUSH_FACTOR;
 				objSrc->OnCollisionWith(colY);
 			}
 		}
 		else
 		if (colX != NULL)
 		{
-			x += colX->t * dx; 
+			x += colX->t * dx + colX->nx * BLOCK_PUSH_FACTOR;
 			y += dy;
 			objSrc->OnCollisionWith(colX);
 		}
@@ -299,7 +301,7 @@ void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* co
 			if (colY != NULL)
 			{
 				x += dx;
-				y += colY->t * dy; 
+				y += colY->t * dy + colY->ny * BLOCK_PUSH_FACTOR;
 				objSrc->OnCollisionWith(colY);
 			}
 			else // both colX & colY are NULL 

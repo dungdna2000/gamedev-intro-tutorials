@@ -57,6 +57,16 @@
 #define ID_ANI_MARIO_BRACE_RIGHT 1000
 #define ID_ANI_MARIO_BRACE_LEFT 1001
 
+// SMALL MARIO
+#define ID_ANI_MARIO_SMALL_IDLE_RIGHT 1100
+#define ID_ANI_MARIO_SMALL_IDLE_LEFT 1102
+
+#define ID_ANI_MARIO_SMALL_WALKING_RIGHT 1200
+#define ID_ANI_MARIO_SMALL_WALKING_LEFT 1201
+
+#define ID_ANI_MARIO_SMALL_RUNNING_RIGHT 1300
+#define ID_ANI_MARIO_SMALL_RUNNING_LEFT 1301
+
 #pragma endregion
 
 #define GROUND_Y 160.0f
@@ -75,7 +85,7 @@
 #define MARIO_SIT_HEIGHT_ADJUST ((MARIO_BIG_BBOX_HEIGHT-MARIO_BIG_SITTING_BBOX_HEIGHT)/2)
 
 #define MARIO_SMALL_BBOX_WIDTH  13
-#define MARIO_SMALL_BBOX_HEIGHT 15
+#define MARIO_SMALL_BBOX_HEIGHT 14
 
 
 
@@ -96,6 +106,9 @@ class CMario : public CGameObject
 
 	void OnCollisionWithGoomba(LPCOLLISIONEVENT e);
 	void OnCollisionWithCoin(LPCOLLISIONEVENT e);
+
+	int GetAniIdBig();
+	int GetAniIdSmall();
 
 public:
 	CMario(float x, float y) : CGameObject(x, y)

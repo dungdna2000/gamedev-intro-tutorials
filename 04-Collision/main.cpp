@@ -64,14 +64,15 @@
 #define ID_SPRITE_COIN 40000
 
 #define BRICK_X 0.0f
-#define BRICK_Y GROUND_Y + 20.0f
-#define NUM_BRICKS 50
+#define GOOMBA_X 100.0f
+#define COIN_X 100.0f
 
+
+#define BRICK_Y GROUND_Y + 20.0f
+#define NUM_BRICKS 70
 
 CGame *game;
-
 CMario *mario;
-CGoomba *goomba;
 
 list<LPGAMEOBJECT> objects;
 
@@ -110,13 +111,17 @@ void LoadResources()
 	
 	LPTEXTURE texMario = textures->Get(ID_TEX_MARIO);
 
+	// IDLE LEFT
 	sprites->Add(10001, 246, 154, 260, 181, texMario);
 
+	// WALKING LEFT
 	sprites->Add(10002, 275, 154, 290, 181, texMario);
 	sprites->Add(10003, 304, 154, 321, 181, texMario);
 
+	// IDLE RIGHT
 	sprites->Add(10011, 186, 154, 200, 181, texMario);
 
+	// WALKING RIGHT
 	sprites->Add(10012, 155, 154, 170, 181, texMario);
 	sprites->Add(10013, 125, 154, 140, 181, texMario);
 
@@ -146,6 +151,18 @@ void LoadResources()
 	sprites->Add(10061, 425, 154, 425 + 15, 154 + 27, texMario);
 	sprites->Add(10062, 5, 154, 5 + 15, 154 + 27, texMario);
 
+
+	// MARIO DIE
+	sprites->Add(10099, 215, 120, 231, 135, texMario);		
+
+	// SMALL MARIO 
+	sprites->Add(10121, 247, 0, 259, 15, texMario);			// idle small right
+	sprites->Add(10122, 275, 0, 291, 15, texMario);			// walk 
+	sprites->Add(10123, 306, 0, 320, 15, texMario);			// 
+
+	sprites->Add(10131, 187, 0, 198, 15, texMario);			// idle small left
+	sprites->Add(10132, 155, 0, 170, 15, texMario);			// walk
+	sprites->Add(10133, 125, 0, 139, 15, texMario);			//
 
 
 	LPANIMATION ani;
@@ -214,6 +231,29 @@ void LoadResources()
 	ani->Add(10062);
 	animations->Add(ID_ANI_MARIO_BRACE_LEFT, ani);
 
+	//
+	// SMALL MARIO 
+	//
+	ani = new CAnimation(100);
+	ani->Add(10121);
+	animations->Add(ID_ANI_MARIO_SMALL_IDLE_RIGHT, ani);
+
+	ani = new CAnimation(100);
+	ani->Add(10121);
+	ani->Add(10122);
+	ani->Add(10123);
+	animations->Add(ID_ANI_MARIO_SMALL_WALKING_RIGHT, ani);
+
+	ani = new CAnimation(100);
+	ani->Add(10131);
+	animations->Add(ID_ANI_MARIO_SMALL_IDLE_LEFT, ani);
+
+	ani = new CAnimation(100);
+	ani->Add(10131);
+	ani->Add(10132);
+	ani->Add(10133);
+	animations->Add(ID_ANI_MARIO_SMALL_WALKING_LEFT, ani);
+
 	/// GOOMBA 
 	LPTEXTURE texEnemy = textures->Get(ID_TEX_ENEMY);
 	
@@ -257,27 +297,38 @@ void Reload()
 {
 	objects.clear();
 
+	// Main ground
 	for (int i = 0; i < NUM_BRICKS; i++)
 	{
-		CBrick* b = new CBrick(BRICK_X + i * BRICK_WIDTH, BRICK_Y);
+		CBrick* b = new CBrick(i * BRICK_WIDTH * 1.0f, BRICK_Y);
 		objects.push_back(b);
 	}
 
-	for (int i = 0; i < 3; i++)
+	// Short, low platform
+	for (int i = 1; i < 3; i++)
 	{
-		CBrick* b = new CBrick(BRICK_X + i * BRICK_WIDTH, BRICK_Y - 44.0f);
+		CBrick* b = new CBrick(i * BRICK_WIDTH * 1.0f, BRICK_Y - 44.0f);
 		objects.push_back(b);
 	}
 
-	for (int i = 0; i < 5; i++)
+	// Vertical column
+	for (int i = 0; i < 8; i++)
 	{
-		CBrick* b = new CBrick(BRICK_X, BRICK_Y - i * BRICK_WIDTH);
+		CBrick* b = new CBrick(0, BRICK_Y - i * BRICK_WIDTH);
 		objects.push_back(b);
 	}
 
-	for (int i = 1; i < 2; i++)
+	// Vertical column
+	for (int i = 1; i < 4; i++)
 	{
 		CBrick* b = new CBrick(BRICK_X + 300.0f, BRICK_Y - i * BRICK_WIDTH);
+		objects.push_back(b);
+	}
+
+	// Second large platform 
+	for (int i = 1; i < 10; i++)
+	{
+		CBrick* b = new CBrick(90.0f + i * BRICK_WIDTH, GROUND_Y - 80.0f);
 		objects.push_back(b);
 	}
 
@@ -286,14 +337,14 @@ void Reload()
 
 	for (int j = 0; j < 6; j++)
 	{
-		CGoomba* goomba = new CGoomba(100.0f + j * 60, 30.0f);
+		CGoomba* goomba = new CGoomba(GOOMBA_X + j * 60, GROUND_Y - 120.0f);
 		objects.push_back(goomba);
 	}
 
 	// COINS 
 	for (int i = 0; i < 10; i++)
 	{
-		CCoin* c = new CCoin(100.0f + i * (COIN_WIDTH * 2), BRICK_Y - 70.0f);
+		CCoin* c = new CCoin(COIN_X + i * (COIN_WIDTH * 2), GROUND_Y - 96.0f);
 		objects.push_back(c);
 	}
 }
@@ -332,6 +383,8 @@ void Update(DWORD dt)
 
 	cx -= SCREEN_WIDTH / 2;
 	cy -= SCREEN_HEIGHT / 2;
+
+	if (cx < 0) cx = 0;
 
 	CGame::GetInstance()->SetCamPos(cx, 0.0f /*cy*/);
 }
