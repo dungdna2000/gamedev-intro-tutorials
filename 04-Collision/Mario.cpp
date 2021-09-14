@@ -73,7 +73,10 @@ void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 					StartUntouchable();
 				}
 				else
+				{
+					DebugOut(L">>> Mario DIE >>> \n");
 					SetState(MARIO_STATE_DIE);
+				}
 			}
 		}
 	}
@@ -125,18 +128,18 @@ int CMario::GetAniIdSmall()
 			else if (vx > 0)
 			{
 				if (ax < 0)
-					aniId = ID_ANI_MARIO_BRACE_RIGHT;
+					aniId = ID_ANI_MARIO_SMALL_BRACE_RIGHT;
 				else if (ax == MARIO_ACCEL_RUN_X)
-					aniId = ID_ANI_MARIO_RUNNING_RIGHT;
+					aniId = ID_ANI_MARIO_SMALL_RUNNING_RIGHT;
 				else if (ax == MARIO_ACCEL_WALK_X)
 					aniId = ID_ANI_MARIO_SMALL_WALKING_RIGHT;
 			}
 			else // vx < 0
 			{
 				if (ax > 0)
-					aniId = ID_ANI_MARIO_BRACE_LEFT;
+					aniId = ID_ANI_MARIO_SMALL_BRACE_LEFT;
 				else if (ax == -MARIO_ACCEL_RUN_X)
-					aniId = ID_ANI_MARIO_RUNNING_LEFT;
+					aniId = ID_ANI_MARIO_SMALL_RUNNING_LEFT;
 				else if (ax == -MARIO_ACCEL_WALK_X)
 					aniId = ID_ANI_MARIO_SMALL_WALKING_LEFT;
 			}
@@ -213,7 +216,9 @@ void CMario::Render()
 	CAnimations* animations = CAnimations::GetInstance();
 	int aniId = -1;
 
-	if (level == MARIO_LEVEL_BIG)
+	if (state == MARIO_STATE_DIE)
+		aniId = ID_ANI_MARIO_DIE;
+	else if (level == MARIO_LEVEL_BIG)
 		aniId = GetAniIdBig();
 	else if (level == MARIO_LEVEL_SMALL)
 		aniId = GetAniIdSmall();
@@ -226,6 +231,9 @@ void CMario::Render()
 
 void CMario::SetState(int state)
 {
+	// DIE is the end state, cannot be changed! 
+	if (this->state == MARIO_STATE_DIE) return; 
+
 	switch (state)
 	{
 	case MARIO_STATE_RUNNING_RIGHT:
@@ -268,7 +276,7 @@ void CMario::SetState(int state)
 		break;
 
 	case MARIO_STATE_SIT:
-		if (isOnPlatform)
+		if (isOnPlatform && level != MARIO_LEVEL_SMALL)
 		{
 			state = MARIO_STATE_IDLE;
 			isSitting = true;
@@ -278,14 +286,22 @@ void CMario::SetState(int state)
 		break;
 
 	case MARIO_STATE_SIT_RELEASE:
-		isSitting = false;
-		state = MARIO_STATE_IDLE;
-		y -= MARIO_SIT_HEIGHT_ADJUST;
+		if (isSitting)
+		{
+			isSitting = false;
+			state = MARIO_STATE_IDLE;
+			y -= MARIO_SIT_HEIGHT_ADJUST;
+		}
 		break;
 
 	case MARIO_STATE_IDLE:
 		ax = 0.0f;
 		vx = 0.0f;
+		break;
+
+	case MARIO_STATE_DIE:
+		vy = -MARIO_JUMP_DEFLECT_SPEED;
+		vx = 0;
 		break;
 	}
 

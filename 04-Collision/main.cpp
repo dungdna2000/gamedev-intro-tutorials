@@ -151,7 +151,6 @@ void LoadResources()
 	sprites->Add(10061, 425, 154, 425 + 15, 154 + 27, texMario);
 	sprites->Add(10062, 5, 154, 5 + 15, 154 + 27, texMario);
 
-
 	// MARIO DIE
 	sprites->Add(10099, 215, 120, 231, 135, texMario);		
 
@@ -163,6 +162,18 @@ void LoadResources()
 	sprites->Add(10131, 187, 0, 198, 15, texMario);			// idle small left
 	sprites->Add(10132, 155, 0, 170, 15, texMario);			// walk
 	sprites->Add(10133, 125, 0, 139, 15, texMario);			//
+
+	sprites->Add(10141, 275, 0, 275 + 15, 15, texMario);	// running right
+	sprites->Add(10142, 306, 0, 306 + 15, 15, texMario);	// 
+	sprites->Add(10143, 335, 0, 335 + 15, 15, texMario);	//
+
+	sprites->Add(10151, 155, 0, 155 + 15, 15, texMario);	// running left
+	sprites->Add(10152, 125, 0, 125 + 15, 15, texMario);	// 
+	sprites->Add(10153, 95, 0, 95 + 15, 15, texMario);	//
+
+
+	sprites->Add(10161, 6, 0, 6 + 13, 15, texMario);		// brace left
+	sprites->Add(10171, 426, 0, 426 + 13, 15, texMario);	// brace right
 
 
 	LPANIMATION ani;
@@ -231,6 +242,11 @@ void LoadResources()
 	ani->Add(10062);
 	animations->Add(ID_ANI_MARIO_BRACE_LEFT, ani);
 
+	ani = new CAnimation(100);
+	ani->Add(10099);
+	animations->Add(ID_ANI_MARIO_DIE, ani);
+
+
 	//
 	// SMALL MARIO 
 	//
@@ -253,6 +269,27 @@ void LoadResources()
 	ani->Add(10132);
 	ani->Add(10133);
 	animations->Add(ID_ANI_MARIO_SMALL_WALKING_LEFT, ani);
+
+	ani = new CAnimation(100);
+	ani->Add(10141);
+	ani->Add(10142);
+	ani->Add(10143);
+	animations->Add(ID_ANI_MARIO_SMALL_RUNNING_RIGHT, ani);
+
+	ani = new CAnimation(100);
+	ani->Add(10151);
+	ani->Add(10152);
+	ani->Add(10153);
+	animations->Add(ID_ANI_MARIO_SMALL_RUNNING_LEFT, ani);
+
+	ani = new CAnimation(100);
+	ani->Add(10161);
+	animations->Add(ID_ANI_MARIO_SMALL_BRACE_LEFT, ani);
+
+	ani = new CAnimation(100);
+	ani->Add(10171);
+	animations->Add(ID_ANI_MARIO_SMALL_BRACE_RIGHT, ani);
+
 
 	/// GOOMBA 
 	LPTEXTURE texEnemy = textures->Get(ID_TEX_ENEMY);

@@ -57,6 +57,8 @@
 #define ID_ANI_MARIO_BRACE_RIGHT 1000
 #define ID_ANI_MARIO_BRACE_LEFT 1001
 
+#define ID_ANI_MARIO_DIE 999
+
 // SMALL MARIO
 #define ID_ANI_MARIO_SMALL_IDLE_RIGHT 1100
 #define ID_ANI_MARIO_SMALL_IDLE_LEFT 1102
@@ -67,12 +69,15 @@
 #define ID_ANI_MARIO_SMALL_RUNNING_RIGHT 1300
 #define ID_ANI_MARIO_SMALL_RUNNING_LEFT 1301
 
+#define ID_ANI_MARIO_SMALL_BRACE_RIGHT 1400
+#define ID_ANI_MARIO_SMALL_BRACE_LEFT 1401
+
 #pragma endregion
 
 #define GROUND_Y 160.0f
 
 
-#define MARIO_ANI_DIE				8
+
 
 #define	MARIO_LEVEL_SMALL	1
 #define	MARIO_LEVEL_BIG		2
@@ -88,8 +93,7 @@
 #define MARIO_SMALL_BBOX_HEIGHT 14
 
 
-
-#define MARIO_UNTOUCHABLE_TIME 5000
+#define MARIO_UNTOUCHABLE_TIME 2500
 
 class CMario : public CGameObject
 {
@@ -132,6 +136,8 @@ public:
 	{ 
 		return (state != MARIO_STATE_DIE); 
 	}
+
+	int IsBlocking() { return (state != MARIO_STATE_DIE && untouchable==0); }
 
 	void OnNoCollision(DWORD dt);
 	void OnCollisionWith(LPCOLLISIONEVENT e);
