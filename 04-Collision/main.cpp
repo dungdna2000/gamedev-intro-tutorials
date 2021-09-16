@@ -91,24 +91,12 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-/*
-	Load all game resources 
-	In this example: load textures, sprites, animations and mario object
-
-	TO-DO: Improve this function by loading texture,sprite,animation,object from file
-*/
-void LoadResources()
+void LoadAssetsMario()
 {
-	CTextures * textures = CTextures::GetInstance();
+	CTextures* textures = CTextures::GetInstance();
+	CSprites* sprites = CSprites::GetInstance();
+	CAnimations* animations = CAnimations::GetInstance();
 
-	textures->Add(ID_TEX_MARIO, TEXTURE_PATH_MARIO);
-	textures->Add(ID_TEX_ENEMY, TEXTURE_PATH_ENEMY);
-	textures->Add(ID_TEX_MISC, TEXTURE_PATH_MISC);
-	textures->Add(ID_TEX_BBOX, TEXTURE_PATH_BBOX);
-
-	CSprites * sprites = CSprites::GetInstance();
-	CAnimations * animations = CAnimations::GetInstance();
-	
 	LPTEXTURE texMario = textures->Get(ID_TEX_MARIO);
 
 	// IDLE LEFT
@@ -126,7 +114,7 @@ void LoadResources()
 	sprites->Add(10013, 125, 154, 140, 181, texMario);
 
 	// RUNNING RIGHT 
-	sprites->Add(10021, 335, 154, 335 + 18, 154 +26, texMario);
+	sprites->Add(10021, 335, 154, 335 + 18, 154 + 26, texMario);
 	sprites->Add(10022, 363, 154, 363 + 18, 154 + 26, texMario);
 	sprites->Add(10023, 393, 154, 393 + 18, 154 + 26, texMario);
 
@@ -152,7 +140,7 @@ void LoadResources()
 	sprites->Add(10062, 5, 154, 5 + 15, 154 + 27, texMario);
 
 	// MARIO DIE
-	sprites->Add(10099, 215, 120, 231, 135, texMario);		
+	sprites->Add(10099, 215, 120, 231, 135, texMario);
 
 	// SMALL MARIO 
 	sprites->Add(10121, 247, 0, 259, 15, texMario);			// idle small right
@@ -178,7 +166,7 @@ void LoadResources()
 
 	LPANIMATION ani;
 
-	ani = new CAnimation(100);	
+	ani = new CAnimation(100);
 	ani->Add(10001);
 	animations->Add(ID_ANI_MARIO_IDLE_RIGHT, ani);
 
@@ -214,7 +202,7 @@ void LoadResources()
 	ani->Add(10041);
 	animations->Add(ID_ANI_MARIO_JUMP_WALK_RIGHT, ani);
 
-	ani = new CAnimation(100);	
+	ani = new CAnimation(100);
 	ani->Add(10042);
 	animations->Add(ID_ANI_MARIO_JUMP_WALK_LEFT, ani);
 
@@ -290,16 +278,21 @@ void LoadResources()
 	ani->Add(10171);
 	animations->Add(ID_ANI_MARIO_SMALL_BRACE_RIGHT, ani);
 
+}
+void LoadAssetsGoomba()
+{
+	CTextures* textures = CTextures::GetInstance();
+	CSprites* sprites = CSprites::GetInstance();
+	CAnimations* animations = CAnimations::GetInstance();
 
-	/// GOOMBA 
 	LPTEXTURE texEnemy = textures->Get(ID_TEX_ENEMY);
-	
+
 	sprites->Add(ID_SPRITE_GOOMBA + 1, 5, 14, 21, 29, texEnemy);  // walk 1
 	sprites->Add(ID_SPRITE_GOOMBA + 2, 25, 14, 41, 29, texEnemy); // walk 2
 
 	sprites->Add(ID_SPRITE_GOOMBA + 3, 45, 21, 61, 29, texEnemy); // die
 
-	ani = new CAnimation(100);
+	LPANIMATION ani = new CAnimation(100);
 	ani->Add(ID_SPRITE_GOOMBA + 1);
 	ani->Add(ID_SPRITE_GOOMBA + 2);
 	animations->Add(ID_ANI_GOOMBA_WALKING, ani);
@@ -308,26 +301,60 @@ void LoadResources()
 	ani->Add(ID_SPRITE_GOOMBA + 3);
 	animations->Add(ID_ANI_GOOMBA_DIE, ani);
 
-	// Brick 
+}
+void LoadAssetsBrick()
+{
+	CTextures* textures = CTextures::GetInstance();
+	CSprites* sprites = CSprites::GetInstance();
+	CAnimations* animations = CAnimations::GetInstance();
+
 	LPTEXTURE texMisc = textures->Get(ID_TEX_MISC);
 	sprites->Add(ID_SPRITE_BRICK, 372, 153, 372 + 15, 153 + 15, texMisc);
 
-	// Coin
+	LPANIMATION ani = new CAnimation(100);
+	ani->Add(ID_SPRITE_BRICK);
+	animations->Add(ID_ANI_BRICK, ani);
+}
+void LoadAssetsCoin()
+{
+	CTextures* textures = CTextures::GetInstance();
+	CSprites* sprites = CSprites::GetInstance();
+	CAnimations* animations = CAnimations::GetInstance();
+
+	LPTEXTURE texMisc = textures->Get(ID_TEX_MISC);
+
 	sprites->Add(ID_SPRITE_COIN + 1, 303, 99, 303 + 9, 99 + 15, texMisc);
 	sprites->Add(ID_SPRITE_COIN + 2, 321, 99, 321 + 9, 99 + 15, texMisc);
 	sprites->Add(ID_SPRITE_COIN + 3, 338, 99, 338 + 9, 99 + 15, texMisc);
 
-
-	ani = new CAnimation(100);
-	ani->Add(ID_SPRITE_BRICK);
-	animations->Add(ID_ANI_BRICK, ani);
-
-
-	ani = new CAnimation(300);
+	LPANIMATION ani = new CAnimation(300);
 	ani->Add(ID_SPRITE_COIN + 1);
 	ani->Add(ID_SPRITE_COIN + 2);
 	ani->Add(ID_SPRITE_COIN + 3);
 	animations->Add(ID_ANI_COIN, ani);
+}
+
+/*
+	Load all game resources
+	In this example: load textures, sprites, animations and mario object
+
+	TO-DO: Improve this function by loading texture,sprite,animation,object from file
+*/
+void LoadResources()
+{
+	CTextures* textures = CTextures::GetInstance();
+	CSprites* sprites = CSprites::GetInstance();
+	CAnimations* animations = CAnimations::GetInstance();
+
+	textures->Add(ID_TEX_MARIO, TEXTURE_PATH_MARIO);
+	textures->Add(ID_TEX_ENEMY, TEXTURE_PATH_ENEMY);
+	textures->Add(ID_TEX_MISC, TEXTURE_PATH_MISC);
+	textures->Add(ID_TEX_BBOX, TEXTURE_PATH_BBOX);
+
+	LoadAssetsMario();
+	LoadAssetsGoomba();
+	LoadAssetsBrick();
+	LoadAssetsCoin();
 }
 
 void Reload()
