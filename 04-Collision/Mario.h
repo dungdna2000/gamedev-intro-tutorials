@@ -72,6 +72,12 @@
 #define ID_ANI_MARIO_SMALL_BRACE_RIGHT 1400
 #define ID_ANI_MARIO_SMALL_BRACE_LEFT 1401
 
+#define ID_ANI_MARIO_SMALL_JUMP_WALK_RIGHT 1500
+#define ID_ANI_MARIO_SMALL_JUMP_WALK_LEFT 1501
+
+#define ID_ANI_MARIO_SMALL_JUMP_RUN_RIGHT 1600
+#define ID_ANI_MARIO_SMALL_JUMP_RUN_LEFT 1601
+
 #pragma endregion
 
 #define GROUND_Y 160.0f
@@ -142,7 +148,7 @@ public:
 	void OnNoCollision(DWORD dt);
 	void OnCollisionWith(LPCOLLISIONEVENT e);
 
-	void SetLevel(int l) { level = l; }
+	void SetLevel(int l);
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount64(); }
 
 	void GetBoundingBox(float& left, float& top, float& right, float& bottom);
