@@ -6,13 +6,14 @@
 	This sample illustrates how to:
 
 		1/ Implement SweptAABB algorithm between moving objects
-		2/ Implement a simple (yet effective) collision frame work
+		2/ Implement a simple (yet effective) collision frame work, applying on Mario, Brick, Goomba & Coin
 
 	Key functions: 
-		CGame::SweptAABB
-		CGameObject::SweptAABBEx
-		CGameObject::CalcPotentialCollisions
-		CGameObject::FilterCollision
+		CCollision::SweptAABB
+		CCollision::SweptAABBEx
+		CCollision::Scan
+		CCollision::Filter
+		CCollision::Process
 
 		CGameObject::GetBoundingBox
 		
@@ -54,16 +55,6 @@
 #define TEXTURE_PATH_MISC TEXTURES_DIR "\\misc.png"
 #define TEXTURE_PATH_ENEMY TEXTURES_DIR "\\enemies.png"
 #define TEXTURE_PATH_BBOX TEXTURES_DIR "\\bbox.png"
-
-#define MARIO_START_X 20.0f
-#define MARIO_START_Y 10.0f
-
-#define BRICK_X 0.0f
-#define GOOMBA_X 100.0f
-#define COIN_X 100.0f
-
-#define BRICK_Y GROUND_Y + 20.0f
-#define NUM_BRICKS 70
 
 CGame *game;
 CMario *mario;
@@ -135,25 +126,25 @@ void LoadAssetsMario()
 	sprites->Add(ID_SPRITE_MARIO_DIE + 1, 215, 120, 231, 135, texMario);
 
 	// SMALL MARIO 
-	sprites->Add(ID_SPRITE_MARIO_SMALL_IDLE_RIGHT + 1, 247, 0, 259, 15, texMario);			// idle small right
-	sprites->Add(ID_SPRITE_MARIO_SMALL_IDLE_LEFT + 1, 187, 0, 198, 15, texMario);			// idle small left
+	sprites->Add(ID_SPRITE_MARIO_SMALL_IDLE_RIGHT + 1, 247, 0, 259, 15, texMario);			
+	sprites->Add(ID_SPRITE_MARIO_SMALL_IDLE_LEFT + 1, 187, 0, 198, 15, texMario);			
 
-	sprites->Add(ID_SPRITE_MARIO_SMALL_WALKING_RIGHT + 2, 275, 0, 291, 15, texMario);			// walk 
-	sprites->Add(ID_SPRITE_MARIO_SMALL_WALKING_RIGHT + 3, 306, 0, 320, 15, texMario);			// 
+	sprites->Add(ID_SPRITE_MARIO_SMALL_WALKING_RIGHT + 2, 275, 0, 291, 15, texMario);			
+	sprites->Add(ID_SPRITE_MARIO_SMALL_WALKING_RIGHT + 3, 306, 0, 320, 15, texMario); 
 
-	sprites->Add(ID_SPRITE_MARIO_SMALL_WALKING_LEFT + 2, 155, 0, 170, 15, texMario);			// walk
-	sprites->Add(ID_SPRITE_MARIO_SMALL_WALKING_LEFT + 3, 125, 0, 139, 15, texMario);			//
+	sprites->Add(ID_SPRITE_MARIO_SMALL_WALKING_LEFT + 2, 155, 0, 170, 15, texMario);
+	sprites->Add(ID_SPRITE_MARIO_SMALL_WALKING_LEFT + 3, 125, 0, 139, 15, texMario);
 
-	sprites->Add(ID_SPRITE_MARIO_SMALL_RUNNING_RIGHT + 1, 275, 0, 275 + 15, 15, texMario);	// running right
-	sprites->Add(ID_SPRITE_MARIO_SMALL_RUNNING_RIGHT + 2, 306, 0, 306 + 15, 15, texMario);	// 
-	sprites->Add(ID_SPRITE_MARIO_SMALL_RUNNING_RIGHT + 3, 335, 0, 335 + 15, 15, texMario);	//
+	sprites->Add(ID_SPRITE_MARIO_SMALL_RUNNING_RIGHT + 1, 275, 0, 275 + 15, 15, texMario);
+	sprites->Add(ID_SPRITE_MARIO_SMALL_RUNNING_RIGHT + 2, 306, 0, 306 + 15, 15, texMario); 
+	sprites->Add(ID_SPRITE_MARIO_SMALL_RUNNING_RIGHT + 3, 335, 0, 335 + 15, 15, texMario);
 
-	sprites->Add(ID_SPRITE_MARIO_SMALL_RUNNING_LEFT + 1, 155, 0, 155 + 15, 15, texMario);	// running left
-	sprites->Add(ID_SPRITE_MARIO_SMALL_RUNNING_LEFT + 2, 125, 0, 125 + 15, 15, texMario);	// 
-	sprites->Add(ID_SPRITE_MARIO_SMALL_RUNNING_LEFT + 3, 95, 0, 95 + 15, 15, texMario);	//
+	sprites->Add(ID_SPRITE_MARIO_SMALL_RUNNING_LEFT + 1, 155, 0, 155 + 15, 15, texMario);
+	sprites->Add(ID_SPRITE_MARIO_SMALL_RUNNING_LEFT + 2, 125, 0, 125 + 15, 15, texMario);
+	sprites->Add(ID_SPRITE_MARIO_SMALL_RUNNING_LEFT + 3, 95, 0, 95 + 15, 15, texMario);
 
-	sprites->Add(ID_SPRITE_MARIO_SMALL_BRACE_LEFT + 1, 6, 0, 6 + 13, 15, texMario);		// brace left
-	sprites->Add(ID_SPRITE_MARIO_SMALL_BRACE_RIGHT + 1, 426, 0, 426 + 13, 15, texMario);	// brace right
+	sprites->Add(ID_SPRITE_MARIO_SMALL_BRACE_LEFT + 1, 6, 0, 6 + 13, 15, texMario);
+	sprites->Add(ID_SPRITE_MARIO_SMALL_BRACE_RIGHT + 1, 426, 0, 426 + 13, 15, texMario);
 
 	sprites->Add(ID_SPRITE_MARIO_SMALL_JUMP_WALK_LEFT + 1, 35, 80, 35 + 15, 80 + 15, texMario);		
 	sprites->Add(ID_SPRITE_MARIO_SMALL_JUMP_WALK_RIGHT + 1, 395, 80, 395 + 15, 80 + 15, texMario);
@@ -300,10 +291,10 @@ void LoadAssetsGoomba()
 
 	LPTEXTURE texEnemy = textures->Get(ID_TEX_ENEMY);
 
-	sprites->Add(ID_SPRITE_GOOMBA_WALK + 1, 5, 14, 21, 29, texEnemy);  // walk 1
-	sprites->Add(ID_SPRITE_GOOMBA_WALK + 2, 25, 14, 41, 29, texEnemy); // walk 2
+	sprites->Add(ID_SPRITE_GOOMBA_WALK + 1, 5, 14, 21, 29, texEnemy);  
+	sprites->Add(ID_SPRITE_GOOMBA_WALK + 2, 25, 14, 41, 29, texEnemy); 
 
-	sprites->Add(ID_SPRITE_GOOMBA_DIE + 1, 45, 21, 61, 29, texEnemy); // die
+	sprites->Add(ID_SPRITE_GOOMBA_DIE + 1, 45, 21, 61, 29, texEnemy);
 
 	LPANIMATION ani = new CAnimation(100);
 	ani->Add(ID_SPRITE_GOOMBA_WALK + 1);
@@ -356,8 +347,6 @@ void LoadAssetsCoin()
 void LoadResources()
 {
 	CTextures* textures = CTextures::GetInstance();
-	CSprites* sprites = CSprites::GetInstance();
-	CAnimations* animations = CAnimations::GetInstance();
 
 	textures->Add(ID_TEX_MARIO, TEXTURE_PATH_MARIO);
 	textures->Add(ID_TEX_ENEMY, TEXTURE_PATH_ENEMY);
@@ -370,13 +359,33 @@ void LoadResources()
 	LoadAssetsCoin();
 }
 
+void ClearScene()
+{ 
+	list<LPGAMEOBJECT>::iterator it;
+	for (it = objects.begin(); it != objects.end(); it++)
+	{
+		delete (*it);
+	}
+	objects.clear();
+}
+
+#define MARIO_START_X 20.0f
+#define MARIO_START_Y 10.0f
+
+#define BRICK_X 0.0f
+#define GOOMBA_X 200.0f
+#define COIN_X 100.0f
+
+#define BRICK_Y GROUND_Y + 20.0f
+#define NUM_BRICKS 70
+
 /*
 * Reload all objects of current scene 
+* NOTE: super bad way to build a scene! We need to load a scene from data instead of hard-coding like this 
 */
 void Reload()
 {
-	// TODO: memory lead here
-	objects.clear(); 
+	ClearScene();
 
 	// Main ground
 	for (int i = 0; i < NUM_BRICKS; i++)
@@ -392,24 +401,38 @@ void Reload()
 		objects.push_back(b);
 	}
 
-	// Vertical column
-	for (int i = 0; i < 8; i++)
+	// Vertical column 1
+	for (int i = 0; i < 10; i++)
 	{
 		CBrick* b = new CBrick(0, BRICK_Y - i * BRICK_WIDTH);
 		objects.push_back(b);
 	}
 
-	// Vertical column
-	for (int i = 1; i < 4; i++)
+	// Vertical column 2
+	for (int i = 1; i < 3; i++)
 	{
 		CBrick* b = new CBrick(BRICK_X + 300.0f, BRICK_Y - i * BRICK_WIDTH);
+		objects.push_back(b);
+	}
+
+	// Vertical column 3
+	for (int i = 1; i < 4; i++)
+	{
+		CBrick* b = new CBrick(BRICK_X + 400.0f, BRICK_Y - i * BRICK_WIDTH);
+		objects.push_back(b);
+	}
+
+	// Vertical column 4
+	for (int i = 1; i < 5; i++)
+	{
+		CBrick* b = new CBrick(BRICK_X + 500.0f, BRICK_Y - i * BRICK_WIDTH);
 		objects.push_back(b);
 	}
 
 	// Second large platform 
 	for (int i = 1; i < 10; i++)
 	{
-		CBrick* b = new CBrick(90.0f + i * BRICK_WIDTH, GROUND_Y - 80.0f);
+		CBrick* b = new CBrick(90.0f + i * BRICK_WIDTH, GROUND_Y - 74.0f);
 		objects.push_back(b);
 	}
 
@@ -430,7 +453,24 @@ void Reload()
 	}
 }
 
-bool IsGameObjectDeleted(const LPGAMEOBJECT& o) { return o->IsDeleted(); }
+bool IsGameObjectDeleted(const LPGAMEOBJECT& o) { return o == NULL; }
+
+void PurgeDeletedObjects()
+{
+	list<LPGAMEOBJECT>::iterator it;
+	for (it = objects.begin(); it != objects.end(); it++)
+	{
+		LPGAMEOBJECT o = *it;
+		if (o->IsDeleted())
+		{
+			delete o;
+			*it = NULL;
+		}
+	}
+	objects.erase(
+		std::remove_if(objects.begin(), objects.end(), IsGameObjectDeleted),
+		objects.end());
+}
 
 /*
 	Update world status for this frame
@@ -452,9 +492,7 @@ void Update(DWORD dt)
 		(*i)->Update(dt,&coObjects);
 	}
 
-	objects.erase(
-		std::remove_if(objects.begin(), objects.end(), IsGameObjectDeleted), 
-		objects.end());
+	PurgeDeletedObjects();
 
 	// Update camera to follow mario
 	float cx, cy;

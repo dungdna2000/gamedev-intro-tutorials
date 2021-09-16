@@ -216,7 +216,7 @@ void CCollision::Filter( LPGAMEOBJECT objSrc,
 
 /*
 *  Simple/Sample collision framework 
-*  NOTE: Student needs to improve this based on game logic 
+*  NOTE: Student might need to improve this based on game logic 
 */
 void CCollision::Process(LPGAMEOBJECT objSrc, DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {

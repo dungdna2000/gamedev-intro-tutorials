@@ -61,7 +61,7 @@ void CMario::OnCollisionWithGoomba(LPCOLLISIONEVENT e)
 			vy = -MARIO_JUMP_DEFLECT_SPEED;
 		}
 	}
-	else if (e->nx != 0)
+	else // hit by Goomba
 	{
 		if (untouchable == 0)
 		{
@@ -89,7 +89,7 @@ void CMario::OnCollisionWithCoin(LPCOLLISIONEVENT e)
 }
 
 //
-// Get animdation ID for small Mario
+// Get animation ID for small Mario
 //
 int CMario::GetAniIdSmall()
 {
