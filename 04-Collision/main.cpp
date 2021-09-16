@@ -35,6 +35,7 @@
 #include "Brick.h"
 #include "Goomba.h"
 #include "Coin.h"
+#include "Platform.h"
 
 #include "SampleKeyEventHandler.h"
 
@@ -338,6 +339,18 @@ void LoadAssetsCoin()
 	animations->Add(ID_ANI_COIN, ani);
 }
 
+void LoadAssetsOther()
+{
+	CTextures* textures = CTextures::GetInstance();
+	CSprites* sprites = CSprites::GetInstance();
+
+	LPTEXTURE texMisc = textures->Get(ID_TEX_MISC);
+	sprites->Add(ID_SPRITE_CLOUD_BEGIN, 390, 117, 390 + 15, 117 + 14, texMisc);
+	sprites->Add(ID_SPRITE_CLOUD_MIDDLE, 408, 117, 408 + 15, 117 + 14, texMisc);
+	sprites->Add(ID_SPRITE_CLOUD_END, 426, 117, 426 + 15, 117 + 14, texMisc);
+
+}
+
 /*
 	Load all game resources
 	In this example: load textures, sprites, animations and mario object
@@ -357,6 +370,7 @@ void LoadResources()
 	LoadAssetsGoomba();
 	LoadAssetsBrick();
 	LoadAssetsCoin();
+	LoadAssetsOther();
 }
 
 void ClearScene()
@@ -429,12 +443,10 @@ void Reload()
 		objects.push_back(b);
 	}
 
-	// Second large platform 
-	for (int i = 1; i < 10; i++)
-	{
-		CBrick* b = new CBrick(90.0f + i * BRICK_WIDTH, GROUND_Y - 74.0f);
-		objects.push_back(b);
-	}
+	// Second cloud platform 
+	CPlatform* p = new CPlatform(90.0f, GROUND_Y - 74.0f,
+		16, 15, 16, ID_SPRITE_CLOUD_BEGIN, ID_SPRITE_CLOUD_MIDDLE, ID_SPRITE_CLOUD_END);
+	objects.push_back(p);
 
 	mario = new CMario(MARIO_START_X, MARIO_START_Y);
 	objects.push_back(mario);
@@ -499,11 +511,12 @@ void Update(DWORD dt)
 	mario->GetPosition(cx, cy);
 
 	cx -= SCREEN_WIDTH / 2;
-	cy -= SCREEN_HEIGHT / 2;
+	cy = 0;
+	//cy -= SCREEN_HEIGHT / 2;
 
 	if (cx < 0) cx = 0;
 
-	CGame::GetInstance()->SetCamPos(cx, 0.0f /*cy*/);
+	CGame::GetInstance()->SetCamPos(floor(cx), floor(cy));
 }
 
 /*

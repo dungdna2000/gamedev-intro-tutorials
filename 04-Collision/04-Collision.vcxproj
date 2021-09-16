@@ -139,6 +139,7 @@
     <ClInclude Include="Goomba.h" />
     <ClInclude Include="KeyEventHandler.h" />
     <ClInclude Include="Mario.h" />
+    <ClInclude Include="Platform.h" />
     <ClInclude Include="SampleKeyEventHandler.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="Sprites.h" />
@@ -156,6 +157,7 @@
     <ClCompile Include="Goomba.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mario.cpp" />
+    <ClCompile Include="Platform.cpp" />
     <ClCompile Include="SampleKeyEventHandler.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Sprites.cpp" />
