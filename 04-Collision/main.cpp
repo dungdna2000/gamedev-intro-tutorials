@@ -86,8 +86,8 @@ void LoadAssetsMario()
 	LPTEXTURE texMario = textures->Get(ID_TEX_MARIO);
 
 	// IDLE
-	sprites->Add(ID_SPRITE_MARIO_BIG_IDLE_RIGHT + 1, 246, 154, 260, 181, texMario);
-	sprites->Add(ID_SPRITE_MARIO_BIG_IDLE_LEFT + 1, 186, 154, 200, 181, texMario);
+	sprites->Add(ID_SPRITE_MARIO_BIG_IDLE_RIGHT + 1, 246, 154, 246 + 13, 154 + 26, texMario);
+	sprites->Add(ID_SPRITE_MARIO_BIG_IDLE_LEFT + 1, 186, 154, 186 + 13, 154 + 26, texMario);
 
 	// WALKING LEFT
 	sprites->Add(ID_SPRITE_MARIO_BIG_WALKING_RIGHT + 2, 275, 154, 290, 181, texMario);
@@ -516,7 +516,7 @@ void Update(DWORD dt)
 
 	if (cx < 0) cx = 0;
 
-	CGame::GetInstance()->SetCamPos(floor(cx), floor(cy));
+	CGame::GetInstance()->SetCamPos(cx, cy);
 }
 
 /*
@@ -543,11 +543,6 @@ void Render()
 	{
 		(*i)->Render();
 	}
-
-	//for (int i = 0; i < objects.size(); i++)
-	//{
-	//	objects[i]->Render();
-	//}
 
 	spriteHandler->End();
 	pSwapChain->Present(0, 0);

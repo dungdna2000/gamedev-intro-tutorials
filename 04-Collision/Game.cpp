@@ -87,6 +87,26 @@ void CGame::Init(HWND hWnd, HINSTANCE hInstance)
 	viewPort.TopLeftY = 0;
 	pD3DDevice->RSSetViewports(1, &viewPort);
 
+	//
+	//
+	//
+
+	D3D10_SAMPLER_DESC desc; 
+	desc.Filter = D3D10_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+	desc.AddressU = D3D10_TEXTURE_ADDRESS_CLAMP;
+	desc.AddressV = D3D10_TEXTURE_ADDRESS_CLAMP;
+	desc.AddressW = D3D10_TEXTURE_ADDRESS_CLAMP;
+	desc.MipLODBias = 0;
+	desc.MaxAnisotropy = 1;
+	desc.ComparisonFunc = D3D10_COMPARISON_NEVER;
+	desc.BorderColor[0] = 1.0f;
+	desc.BorderColor[1] = 1.0f;
+	desc.BorderColor[2] = 1.0f;
+	desc.BorderColor[3] = 1.0f;
+	desc.MinLOD = -FLT_MAX;
+	desc.MaxLOD = FLT_MAX;
+
+	pD3DDevice->CreateSamplerState(&desc, &this->pPointSamplerState);
 
 	// create the sprite object to handle sprite drawing 
 	hr = D3DX10CreateSprite(pD3DDevice, 0, &spriteObject);
@@ -126,6 +146,13 @@ void CGame::Init(HWND hWnd, HINSTANCE hInstance)
 	DebugOut((wchar_t*)L"[INFO] InitDirectX has been successful\n");
 
 	return;
+}
+
+void CGame::SetPointSamplerState()
+{
+	pD3DDevice->VSSetSamplers(0, 1, &pPointSamplerState);
+	pD3DDevice->GSSetSamplers(0, 1, &pPointSamplerState);
+	pD3DDevice->PSSetSamplers(0, 1, &pPointSamplerState);
 }
 
 /*
@@ -206,10 +233,35 @@ LPTEXTURE CGame::LoadTexture(LPCWSTR texturePath)
 	ID3D10Resource* pD3D10Resource = NULL;
 	ID3D10Texture2D* tex = NULL;
 
+	// Retrieve image information first 
+	D3DX10_IMAGE_INFO imageInfo;
+	HRESULT hr = D3DX10GetImageInfoFromFile(texturePath, NULL, &imageInfo, NULL);
+	if (FAILED(hr))
+	{
+		DebugOut((wchar_t*)L"[ERROR] D3DX10GetImageInfoFromFile failed for  file: %s with error: %d\n", texturePath, hr);
+		return NULL;
+	}
+
+	D3DX10_IMAGE_LOAD_INFO info; 
+	ZeroMemory(&info, sizeof(D3DX10_IMAGE_LOAD_INFO));
+	info.Width = imageInfo.Width;
+	info.Height = imageInfo.Height;
+	info.Depth = imageInfo.Depth;
+	info.FirstMipLevel = 0;
+	info.MipLevels = 1;
+	info.Usage = D3D10_USAGE_DEFAULT;
+	info.BindFlags = D3DX10_DEFAULT;
+	info.CpuAccessFlags = D3DX10_DEFAULT;
+	info.MiscFlags = D3DX10_DEFAULT;
+	info.Format = imageInfo.Format;
+	info.Filter = D3DX10_FILTER_NONE;
+	info.MipFilter = D3DX10_DEFAULT;
+	info.pSrcInfo = &imageInfo;
+
 	// Loads the texture into a temporary ID3D10Resource object
-	HRESULT hr = D3DX10CreateTextureFromFile(pD3DDevice,
+	hr = D3DX10CreateTextureFromFile(pD3DDevice,
 		texturePath,
-		NULL, //&info,
+		&info,
 		NULL,
 		&pD3D10Resource,
 		NULL);
