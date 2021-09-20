@@ -102,14 +102,14 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		va_end(argp);				\
 }		
 
-void DebugOut(wchar_t* fmt, ...)
+void DebugOut(const wchar_t* fmt, ...)
 {
 	wchar_t s[4096];
 	VA_PRINTS(s);
 	OutputDebugString(s);
 }
 
-void DebugOutTitle(wchar_t* fmt, ...)
+void DebugOutTitle(const wchar_t* fmt, ...)
 {
 	wchar_t s[1024];
 	VA_PRINTS(s);

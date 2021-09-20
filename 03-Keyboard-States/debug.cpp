@@ -3,7 +3,7 @@
 
 HWND _hwnd = NULL;
 
-void DebugOut(wchar_t *fmt, ...)
+void DebugOut(const wchar_t *fmt, ...)
 {
 	va_list argp;
 	va_start(argp, fmt);
@@ -13,7 +13,7 @@ void DebugOut(wchar_t *fmt, ...)
 	OutputDebugString(dbg_out);
 }
 
-void DebugOutTitle(wchar_t* fmt, ...)
+void DebugOutTitle(const wchar_t* fmt, ...)
 {
 	wchar_t s[1024];
 	VA_PRINTS(s);
