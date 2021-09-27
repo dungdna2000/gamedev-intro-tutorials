@@ -1,22 +1,24 @@
 /* =============================================================
 	INTRODUCTION TO GAME PROGRAMMING SE102
 	
-	SAMPLE 04 - COLLISION
+	SAMPLE 05 - SCENE MANAGER
 
 	This sample illustrates how to:
 
-		1/ Implement SweptAABB algorithm between moving objects
-		2/ Implement a simple (yet effective) collision frame work, applying on Mario, Brick, Goomba & Coin
+		1/ Read scene (textures, sprites, animations and objects) from files 
+		2/ Handle multiple scenes in game
 
-	Key functions: 
-		CCollision::SweptAABB
-		CCollision::SweptAABBEx
-		CCollision::Scan
-		CCollision::Filter
-		CCollision::Process
+	Key classes/functions:
+		CScene
+		CPlayScene		
 
-		CGameObject::GetBoundingBox
-		
+
+HOW TO INSTALL Microsoft.DXSDK.D3DX
+===================================
+1) Tools > NuGet package manager > Package Manager Console
+2) execute command :  Install-Package Microsoft.DXSDK.D3DX
+
+
 ================================================================ */
 
 #include <windows.h>
@@ -646,8 +648,8 @@ int WINAPI WinMain(
 	game = CGame::GetInstance();
 	game->Init(hWnd, hInstance);
 
-	keyHandler = new CSampleKeyHandler();
-	game->InitKeyboard(keyHandler);
+	//keyHandler = new CSampleKeyHandler();
+	//game->InitKeyboard(keyHandler);
 
 	LoadResources();
 	Reload();
