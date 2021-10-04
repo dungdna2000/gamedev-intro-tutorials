@@ -24,3 +24,14 @@ LPANIMATION CAnimations::Get(int id)
 		DebugOut(L"[ERROR] Animation ID %d not found\n", id);
 	return ani;
 }
+
+void CAnimations::Clear()
+{
+	for (auto x : animations)
+	{
+		LPANIMATION ani = x.second;
+		delete ani;
+	}
+
+	animations.clear();
+}

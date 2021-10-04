@@ -20,3 +20,17 @@ LPSPRITE CSprites::Get(int id)
 {
 	return sprites[id];
 }
+
+/*
+	Clear all loaded sprites
+*/
+void CSprites::Clear()
+{
+	for (auto x : sprites)
+	{
+		LPSPRITE s = x.second;
+		delete s;
+	}
+
+	sprites.clear();
+}

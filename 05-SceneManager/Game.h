@@ -2,16 +2,22 @@
 #include <Windows.h>
 #include <d3d10.h>
 #include <d3dx10.h>
+#include <unordered_map>
+
+using namespace std;
 
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 
 #include "Texture.h"
 #include "KeyEventHandler.h"
+#include "Scene.h"
 
 #define MAX_FRAME_RATE 100
 #define KEYBOARD_BUFFER_SIZE 1024
 #define KEYBOARD_STATE_SIZE 256
+
+
 
 /*
 	Our simple game framework
@@ -46,6 +52,12 @@ class CGame
 
 	ID3D10SamplerState* pPointSamplerState;
 
+	unordered_map<int, LPSCENE> scenes;
+	int current_scene;
+
+	void _ParseSection_SETTINGS(string line);
+	void _ParseSection_SCENES(string line);
+
 public:
 	// Init DirectX, Sprite Handler
 	void Init(HWND hWnd, HINSTANCE hInstance);
@@ -72,6 +84,8 @@ public:
 	void InitKeyboard(LPKEYEVENTHANDLER handler);
 	int IsKeyDown(int KeyCode);
 	void ProcessKeyboard();
+	void SetKeyHandler(LPKEYEVENTHANDLER handler) { keyHandler = handler; }
+
 
 	ID3D10Device* GetDirect3DDevice() { return this->pD3DDevice; }
 	IDXGISwapChain* GetSwapChain() { return this->pSwapChain; }
@@ -90,6 +104,10 @@ public:
 
 	void SetCamPos(float x, float y) { cam_x = x; cam_y = y; }
 	void GetCamPos(float& x, float& y) { x = cam_x; y = cam_y; }
+
+	LPSCENE GetCurrentScene() { return scenes[current_scene]; }
+	void Load(LPCWSTR gameFile);
+	void SwitchScene(int scene_id);
 
 	~CGame();
 };
