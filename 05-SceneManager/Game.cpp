@@ -323,7 +323,7 @@ int CGame::IsKeyDown(int KeyCode)
 	return (keyStates[KeyCode] & 0x80) > 0;
 }
 
-void CGame::InitKeyboard(LPKEYEVENTHANDLER handler)
+void CGame::InitKeyboard()
 {
 	HRESULT hr = DirectInput8Create(this->hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (VOID**)&di, NULL);
 	if (hr != DI_OK)
@@ -377,8 +377,6 @@ void CGame::InitKeyboard(LPKEYEVENTHANDLER handler)
 		DebugOut(L"[ERROR] DINPUT8::Acquire failed!\n");
 		return;
 	}
-
-	this->keyHandler = handler;
 
 	DebugOut(L"[INFO] Keyboard has been initialized successfully\n");
 }

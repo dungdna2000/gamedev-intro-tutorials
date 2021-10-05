@@ -14,6 +14,7 @@ using namespace std;
 CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 	CScene(id, filePath)
 {
+	player = NULL;
 	key_handler = new CSampleKeyHandler(this);
 }
 
@@ -130,7 +131,8 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 
 	//DebugOut(L"--> %s\n",ToWSTR(line).c_str());
 
-	if (tokens.size() < 3) return; // skip invalid lines - an object set must have at least id, x, y
+	// skip invalid lines - an object set must have at least id, x, y
+	if (tokens.size() < 3) return;
 
 	int object_type = atoi(tokens[0].c_str());
 	float x = (float)atof(tokens[1].c_str());
@@ -153,7 +155,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		obj = new CMario(x,y); 
 		player = (CMario*)obj;  
 
-		DebugOut(L"[INFO] Player object created!\n");
+		DebugOut(L"[INFO] Player object has been created!\n");
 		break;
 	case OBJECT_TYPE_GOOMBA: obj = new CGoomba(x,y); break;
 	case OBJECT_TYPE_BRICK: obj = new CBrick(x,y); break;
@@ -167,6 +169,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	//		obj = new CPortal(x, y, r, b, scene_id);
 	//	}
 	//	break;
+
 	default:
 		DebugOut(L"[ERR] Invalid object type: %d\n", object_type);
 		return;
@@ -265,6 +268,19 @@ void CPlayScene::Render()
 }
 
 /*
+*	Clear all objects from this scene
+*/
+void CPlayScene::Clear()
+{
+	vector<LPGAMEOBJECT>::iterator it;
+	for (it = objects.begin(); it != objects.end(); it++)
+	{
+		delete (*it);
+	}
+	objects.clear();
+}
+
+/*
 	Unload scene
 */
 void CPlayScene::Unload()
@@ -278,33 +294,24 @@ void CPlayScene::Unload()
 	DebugOut(L"[INFO] Scene %d unloaded! \n", id);
 }
 
-//void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
-//{
-//	//DebugOut(L"[INFO] KeyDown: %d\n", KeyCode);
-//
-//	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
-//	switch (KeyCode)
-//	{
-//	case DIK_SPACE:
-//		mario->SetState(MARIO_STATE_JUMP);
-//		break;
-//	case DIK_A: 
-//		mario->Reset();
-//		break;
-//	}
-//}
-//
-//void CPlayScenceKeyHandler::KeyState(BYTE *states)
-//{
-//	CGame *game = CGame::GetInstance();
-//	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
-//
-//	// disable control key when Mario die 
-//	if (mario->GetState() == MARIO_STATE_DIE) return;
-//	if (game->IsKeyDown(DIK_RIGHT))
-//		mario->SetState(MARIO_STATE_WALKING_RIGHT);
-//	else if (game->IsKeyDown(DIK_LEFT))
-//		mario->SetState(MARIO_STATE_WALKING_LEFT);
-//	else
-//		mario->SetState(MARIO_STATE_IDLE);
-//}
+bool CPlayScene::IsGameObjectDeleted(const LPGAMEOBJECT& o) { return o == NULL; }
+
+void CPlayScene::PurgeDeletedObjects()
+{
+	vector<LPGAMEOBJECT>::iterator it;
+	for (it = objects.begin(); it != objects.end(); it++)
+	{
+		LPGAMEOBJECT o = *it;
+		if (o->IsDeleted())
+		{
+			delete o;
+			*it = NULL;
+		}
+	}
+
+	// NOTE: remove_if will swap all deleted items to the end of the vector
+	// then simply trim the vector, this is much more efficient than deleting individual items
+	objects.erase(
+		std::remove_if(objects.begin(), objects.end(), CPlayScene::IsGameObjectDeleted),
+		objects.end());
+}

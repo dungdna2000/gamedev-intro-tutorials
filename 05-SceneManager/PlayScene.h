@@ -12,7 +12,8 @@
 class CPlayScene: public CScene
 {
 protected: 
-	CMario *player;					// A play scene has to have player, right? 
+	// A play scene has to have player, right? 
+	LPGAMEOBJECT player;					
 
 	vector<LPGAMEOBJECT> objects;
 
@@ -31,10 +32,17 @@ public:
 	virtual void Render();
 	virtual void Unload();
 
-	CMario * GetPlayer() { return player; } 
+	LPGAMEOBJECT GetPlayer() { return player; }
+
+	void Clear();
+	void PurgeDeletedObjects();
+
+	static bool IsGameObjectDeleted(const LPGAMEOBJECT& o);
 
 	//friend class CPlayScenceKeyHandler;
 };
+
+typedef CPlayScene* LPPLAYSCENE;
 
 //class CPlayScenceKeyHandler : public CScenceKeyHandler
 //{
