@@ -1,8 +1,16 @@
 [SETTINGS]
 start	3
-#scene list
+width	320
+height	240
+
+#id	type	file
+# type: 0: intro, 1: play scene 
 [SCENES]
-1	scene1.txt
-2	scene2.txt
+1	intro.txt
 3	scene-test.txt
-4	scene-new.txt
+
+# id	file 
+[TEXTURES]
+-100	textures\bbox.png
+0	textures\mario.png
+20	textures\misc.png

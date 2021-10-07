@@ -435,6 +435,8 @@ void CGame::ProcessKeyboard()
 #define GAME_FILE_SECTION_UNKNOWN -1
 #define GAME_FILE_SECTION_SETTINGS 1
 #define GAME_FILE_SECTION_SCENES 2
+#define GAME_FILE_SECTION_TEXTURES 3
+
 
 void CGame::_ParseSection_SETTINGS(string line)
 {
@@ -444,7 +446,7 @@ void CGame::_ParseSection_SETTINGS(string line)
 	if (tokens[0] == "start")
 		current_scene = atoi(tokens[1].c_str());
 	else
-		DebugOut(L"[ERROR] Unknown game setting %s\n", ToWSTR(tokens[0]).c_str());
+		DebugOut(L"[ERROR] Unknown game setting: %s\n", ToWSTR(tokens[0]).c_str());
 }
 
 void CGame::_ParseSection_SCENES(string line)
@@ -480,7 +482,14 @@ void CGame::Load(LPCWSTR gameFile)
 		if (line[0] == '#') continue;	// skip comment lines	
 
 		if (line == "[SETTINGS]") { section = GAME_FILE_SECTION_SETTINGS; continue; }
+		if (line == "[TEXTURES]") { section = GAME_FILE_SECTION_TEXTURES; continue; }
 		if (line == "[SCENES]") { section = GAME_FILE_SECTION_SCENES; continue; }
+		if (line[0] == '[') 
+		{ 
+			section = GAME_FILE_SECTION_UNKNOWN; 
+			DebugOut(L"[ERROR] Unknown section: %s\n", ToLPCWSTR(line));
+			continue; 
+		}
 
 		//
 		// data section
@@ -489,6 +498,7 @@ void CGame::Load(LPCWSTR gameFile)
 		{
 		case GAME_FILE_SECTION_SETTINGS: _ParseSection_SETTINGS(line); break;
 		case GAME_FILE_SECTION_SCENES: _ParseSection_SCENES(line); break;
+		case GAME_FILE_SECTION_TEXTURES: _ParseSection_TEXTURES(line); break;
 		}
 	}
 	f.close();
@@ -504,16 +514,24 @@ void CGame::SwitchScene(int scene_id)
 
 	scenes[current_scene]->Unload();;
 
-	CTextures::GetInstance()->Clear();
-	CSprites::GetInstance()->Clear();
-	CAnimations::GetInstance()->Clear();
-
 	current_scene = scene_id;
 	LPSCENE s = scenes[scene_id];
 	this->SetKeyHandler(s->GetKeyEventHandler());
 	s->Load();
 }
 
+
+void CGame::_ParseSection_TEXTURES(string line)
+{
+	vector<string> tokens = split(line);
+
+	if (tokens.size() < 2) return;
+
+	int texID = atoi(tokens[0].c_str());
+	wstring path = ToWSTR(tokens[1]);
+
+	CTextures::GetInstance()->Add(texID, path.c_str());
+}
 
 
 CGame::~CGame()

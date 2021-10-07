@@ -109,6 +109,9 @@ public:
 	void Load(LPCWSTR gameFile);
 	void SwitchScene(int scene_id);
 
+	void _ParseSection_TEXTURES(string line);
+
+
 	~CGame();
 };
 typedef CGame* LPGAME;
