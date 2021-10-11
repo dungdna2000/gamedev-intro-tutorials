@@ -1,9 +1,9 @@
 # list of object assets to load in this scene
 [ASSETS]
-#mario.txt
+mario.txt
 brick.txt
 coin.txt
-
+#
 [OBJECTS]
 # type	x	y	extra_settings per object type
 # type: 0 = Mario , 1 = Brick, 2 = Goomba, 3 = Koopas
@@ -26,6 +26,18 @@ coin.txt
 1	128	180
 1	144	180
 1	160	180
+1	176	180
+1	192	180
+1	208	180
+1	224	180
+1	240	180
+1	256	180
+1	272	180
+1	288	180
+1	304	180
+1	320	180
+1	336	180
+1	352	180
 
 
 #COIN
