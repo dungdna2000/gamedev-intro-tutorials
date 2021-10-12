@@ -54,6 +54,7 @@ class CGame
 
 	unordered_map<int, LPSCENE> scenes;
 	int current_scene;
+	int next_scene = -1;
 
 	void _ParseSection_SETTINGS(string line);
 	void _ParseSection_SCENES(string line);
@@ -107,7 +108,8 @@ public:
 
 	LPSCENE GetCurrentScene() { return scenes[current_scene]; }
 	void Load(LPCWSTR gameFile);
-	void SwitchScene(int scene_id);
+	void SwitchScene();
+	void InitiateSwitchScene(int scene_id);
 
 	void _ParseSection_TEXTURES(string line);
 
