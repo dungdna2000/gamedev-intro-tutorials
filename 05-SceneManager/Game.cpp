@@ -167,12 +167,12 @@ void CGame::SetPointSamplerState()
 	NOTE: This function is very inefficient because it has to convert
 	from texture to sprite every time we need to draw it
 */
-void CGame::Draw(float x, float y, LPTEXTURE tex, RECT* rect, float alpha)
+void CGame::Draw(float x, float y, LPTEXTURE tex, RECT* rect, float alpha, int sprite_width, int sprite_height)
 {
 	if (tex == NULL) return;
 
-	int spriteWidth = 0;
-	int spriteHeight = 0;
+	int spriteWidth = sprite_width;
+	int spriteHeight = sprite_height;
 
 	D3DX10_SPRITE sprite;
 
@@ -189,16 +189,16 @@ void CGame::Draw(float x, float y, LPTEXTURE tex, RECT* rect, float alpha)
 		sprite.TexSize.x = 1.0f;
 		sprite.TexSize.y = 1.0f;
 
-		spriteWidth = tex->getWidth();
-		spriteHeight = tex->getHeight();
+		if (spriteWidth==0) spriteWidth = tex->getWidth();
+		if (spriteHeight==0) spriteHeight = tex->getHeight();
 	}
 	else
 	{
 		sprite.TexCoord.x = rect->left / (float)tex->getWidth();
 		sprite.TexCoord.y = rect->top / (float)tex->getHeight();
 
-		spriteWidth = (rect->right - rect->left + 1);
-		spriteHeight = (rect->bottom - rect->top + 1);
+		if (spriteWidth == 0) spriteWidth = (rect->right - rect->left + 1);
+		if (spriteHeight == 0) spriteHeight = (rect->bottom - rect->top + 1);
 
 		sprite.TexSize.x = spriteWidth / (float)tex->getWidth();
 		sprite.TexSize.y = spriteHeight / (float)tex->getHeight();
