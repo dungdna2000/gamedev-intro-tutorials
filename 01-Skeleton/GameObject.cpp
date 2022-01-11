@@ -5,9 +5,9 @@
 #include "GameObject.h"
 
 /*
-	Initialize game object and load a texture
+	Initialize game object 
 */
-CGameObject::CGameObject(float x, float y, LPDIRECT3DTEXTURE9 tex)
+CGameObject::CGameObject(float x, float y, LPTEXTURE tex)
 {
 	this->x = x;
 	this->y = y;
@@ -21,7 +21,7 @@ void CGameObject::Render()
 
 CGameObject::~CGameObject()
 {
-	if (texture != NULL) texture->Release();
+	if (texture != NULL) delete texture;
 }
 
 #define MARIO_VX 0.1f

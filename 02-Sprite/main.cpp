@@ -10,13 +10,21 @@
 		3/ Enhance CGameObject with sprite animation
 ================================================================ */
 
-#include <windows.h>
-#include <d3d9.h>
-#include <d3dx9.h>
+#include <Windows.h>
+#include <d3d10.h>
+#include <d3dx10.h>
 
 #include "debug.h"
 #include "Game.h"
 #include "Textures.h"
+
+#include "Sprite.h"
+#include "Sprites.h"
+
+#include "Animation.h"
+#include "Animations.h"
+
+
 #include "Mario.h"
 
 
@@ -24,20 +32,25 @@
 #define MAIN_WINDOW_TITLE L"02 - Sprite animation"
 #define WINDOW_ICON_PATH L"mario.ico"
 
-#define BACKGROUND_COLOR D3DCOLOR_XRGB(200, 200, 255)
+#define BACKGROUND_COLOR D3DXCOLOR(200.0f/255, 200.0f/255, 255.0f/255,0.0f)
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
-
-#define MAX_FRAME_RATE 60
 
 #define ID_TEX_MARIO 0
 #define ID_TEX_ENEMY 10
 #define ID_TEX_MISC 20
 
+#define TEXTURES_DIR L"textures"
+#define TEXTURE_PATH_MARIO TEXTURES_DIR "\\mario.png"
+#define TEXTURE_PATH_MISC TEXTURES_DIR "\\misc_transparent.png"
+#define TEXTURE_PATH_ENEMIES TEXTURES_DIR "\\enemies.png"
+
 CMario *mario;
 #define MARIO_START_X 10.0f
 #define MARIO_START_Y 130.0f
 #define MARIO_START_VX 0.1f
+
+CBrick *brick;
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -60,14 +73,14 @@ void LoadResources()
 {
 	CTextures * textures = CTextures::GetInstance();
 
-	textures->Add(ID_TEX_MARIO, L"textures\\mario.png",D3DCOLOR_XRGB(176, 224, 248));
-	//textures->Add(ID_ENEMY_TEXTURE, L"textures\\enemies.png", D3DCOLOR_XRGB(156, 219, 239));
-	//textures->Add(ID_TEX_MISC, L"textures\\misc.png", D3DCOLOR_XRGB(156, 219, 239));
+	textures->Add(ID_TEX_MARIO, TEXTURE_PATH_MARIO);
+	//textures->Add(ID_ENEMY_TEXTURE, TEXTURE_PATH_ENEMIES, D3DCOLOR_XRGB(156, 219, 239));
+	textures->Add(ID_TEX_MISC, TEXTURE_PATH_MISC);
 
 
 	CSprites * sprites = CSprites::GetInstance();
 	
-	LPDIRECT3DTEXTURE9 texMario = textures->Get(ID_TEX_MARIO);
+	LPTEXTURE texMario = textures->Get(ID_TEX_MARIO);
 
 	// readline => id, left, top, right 
 
@@ -75,15 +88,15 @@ void LoadResources()
 	sprites->Add(10002, 275, 154, 290, 181, texMario);
 	sprites->Add(10003, 304, 154, 321, 181, texMario);
 
-	sprites->Add(10011, 186, 154, 199, 181, texMario);
-	sprites->Add(10012, 155, 154, 170, 181, texMario);
-	sprites->Add(10013, 125, 154, 140, 181, texMario);
+	sprites->Add(10011, 186, 154, 200, 181, texMario);
+	sprites->Add(10012, 155, 154, 171, 181, texMario);
+	sprites->Add(10013, 125, 154, 141, 181, texMario);
 
-	/*LPDIRECT3DTEXTURE9 texMisc = textures->Get(ID_TEX_MISC);
-	sprites->Add(20001, 300, 117, 315, 132, texMisc);
-	sprites->Add(20002, 318, 117, 333, 132, texMisc);
-	sprites->Add(20003, 336, 117, 351, 132, texMisc);
-	sprites->Add(20004, 354, 117, 369, 132, texMisc);*/
+	LPTEXTURE texMisc = textures->Get(ID_TEX_MISC);
+	sprites->Add(20001, 300, 117, 316, 133, texMisc);
+	sprites->Add(20002, 318, 117, 334, 133, texMisc);
+	sprites->Add(20003, 336, 117, 352, 133, texMisc);
+	sprites->Add(20004, 354, 117, 370, 133, texMisc);
 	
 
 	CAnimations * animations = CAnimations::GetInstance();
@@ -101,16 +114,17 @@ void LoadResources()
 	ani->Add(10013);
 	animations->Add(501, ani);
 
-	/*
+	
 	ani = new CAnimation(100);
 	ani->Add(20001,1000);
 	ani->Add(20002);
 	ani->Add(20003);
 	ani->Add(20004);
 	animations->Add(510, ani);
-	*/
+	
 	
 	mario = new CMario(MARIO_START_X, MARIO_START_Y, MARIO_START_VX);
+	brick = new CBrick(100.0f, 100.0f);
 }
 
 /*
@@ -122,49 +136,36 @@ void Update(DWORD dt)
 	mario->Update(dt);
 }
 
-/*
-	Render a frame 
-*/
 void Render()
 {
-	CGame * game = CGame::GetInstance();
-	LPDIRECT3DDEVICE9 d3ddv = game->GetDirect3DDevice();
-	LPDIRECT3DSURFACE9 bb = game->GetBackBuffer();
-	LPD3DXSPRITE spriteHandler = game->GetSpriteHandler();
+	CGame* g = CGame::GetInstance();
 
-	if (d3ddv->BeginScene())
+	ID3D10Device* pD3DDevice = g->GetDirect3DDevice();
+	IDXGISwapChain* pSwapChain = g->GetSwapChain();
+	ID3D10RenderTargetView* pRenderTargetView = g->GetRenderTargetView();
+	ID3DX10Sprite* spriteHandler = g->GetSpriteHandler();
+
+	if (pD3DDevice != NULL)
 	{
-		// Clear back buffer with a color
-		d3ddv->ColorFill(bb, NULL, BACKGROUND_COLOR);
+		// clear the background 
+		pD3DDevice->ClearRenderTargetView(pRenderTargetView, BACKGROUND_COLOR);
 
-		spriteHandler->Begin(D3DXSPRITE_ALPHABLEND);
+		spriteHandler->Begin(D3DX10_SPRITE_SORT_TEXTURE);
 
+		// Use Alpha blending for transparent sprites
+		FLOAT NewBlendFactor[4] = { 0,0,0,0 };
+		pD3DDevice->OMSetBlendState(g->GetAlphaBlending(), NewBlendFactor, 0xffffffff);
+
+		brick->Render();
 		mario->Render();
 
-		DebugOutTitle(L"01 - Sprite %0.1f %0.1f", mario->GetX(), mario->GetY());
+		// Uncomment this line to see how to draw a porttion of a texture  
+		//g->Draw(10, 10, texMisc, 300, 117, 316, 133);
 
-		//
-		// TEST SPRITE DRAW
-		//
-
-		/*
-		CTextures *textures = CTextures::GetInstance();
-
-		D3DXVECTOR3 p(20, 20, 0);
-		RECT r;
-		r.left = 274;
-		r.top = 234;
-		r.right = 292;
-		r.bottom = 264;
-		spriteHandler->Draw(textures->Get(ID_TEX_MARIO), &r, NULL, &p, D3DCOLOR_XRGB(255, 255, 255));
-		*/
 
 		spriteHandler->End();
-		d3ddv->EndScene();
+		pSwapChain->Present(0, 0);
 	}
-
-	// Display back buffer content to the screen
-	d3ddv->Present(NULL, NULL, NULL, NULL);
 }
 
 HWND CreateGameWindow(HINSTANCE hInstance, int nCmdShow, int ScreenWidth, int ScreenHeight)
@@ -220,8 +221,8 @@ int Run()
 {
 	MSG msg;
 	int done = 0;
-	DWORD frameStart = GetTickCount();
-	DWORD tickPerFrame = 1000 / MAX_FRAME_RATE;
+	ULONGLONG frameStart = GetTickCount64();
+	ULONGLONG tickPerFrame = 1000 / MAX_FRAME_RATE;
 
 	while (!done)
 	{
@@ -233,33 +234,40 @@ int Run()
 			DispatchMessage(&msg);
 		}
 
-		DWORD now = GetTickCount();
+		ULONGLONG now = GetTickCount64();
 
 		// dt: the time between (beginning of last frame) and now
 		// this frame: the frame we are about to render
-		DWORD dt = now - frameStart;
+		ULONGLONG dt = now - frameStart;
 
 		if (dt >= tickPerFrame)
 		{
 			frameStart = now;
-			Update(dt);
+			Update((DWORD)dt);
 			Render();
 		}
 		else
-			Sleep(tickPerFrame - dt);	
+			Sleep((DWORD)(tickPerFrame - dt));
 	}
 
 	return 1;
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
+int WINAPI WinMain(
+	_In_ HINSTANCE hInstance,
+	_In_opt_ HINSTANCE hPrevInstance,
+	_In_ LPSTR lpCmdLine,
+	_In_ int nCmdShow
+) {
 	HWND hWnd = CreateGameWindow(hInstance, nCmdShow, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	CGame *game = CGame::GetInstance();
 	game->Init(hWnd);
 
 	LoadResources();
+
+	SetWindowPos(hWnd, 0, 0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
+
 	Run();
 
 	return 0;

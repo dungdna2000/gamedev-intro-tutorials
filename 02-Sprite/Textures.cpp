@@ -1,8 +1,5 @@
 #include <Windows.h>
 
-#include <d3d9.h>
-#include <d3dx9.h>
-
 #include "debug.h"
 #include "Game.h"
 #include "textures.h"
@@ -20,12 +17,12 @@ CTextures *CTextures::GetInstance()
 	return __instance;
 }
 
-void CTextures::Add(int id, LPCWSTR filePath, D3DCOLOR transparentColor)
+void CTextures::Add(int id, LPCWSTR filePath)
 {
 	textures[id] = CGame::GetInstance()->LoadTexture(filePath);
 }
 
-LPDIRECT3DTEXTURE9 CTextures::Get(unsigned int i) 
+LPTEXTURE CTextures::Get(unsigned int i) 
 {
 	return textures[i];
 }

@@ -1,6 +1,8 @@
 #pragma once
 #include <unordered_map>
-#include <d3dx9.h>
+#include <d3dx10.h>
+
+#include "Texture.h"
 
 using namespace std;
 
@@ -9,14 +11,14 @@ using namespace std;
 */
 class CTextures
 {
-	static CTextures * __instance;
+	static CTextures* __instance;
 
-	unordered_map<int, LPDIRECT3DTEXTURE9> textures;
+	unordered_map<int, LPTEXTURE> textures;
 
-public: 
+public:
 	CTextures();
-	void Add(int id, LPCWSTR filePath, D3DCOLOR transparentColor);
-	LPDIRECT3DTEXTURE9 Get(unsigned int i);
+	void Add(int id, LPCWSTR filePath);
+	LPTEXTURE Get(unsigned int i);
 
-	static CTextures * GetInstance();
+	static CTextures* GetInstance();
 };
