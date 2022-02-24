@@ -312,18 +312,21 @@ void Update(DWORD dt)
 
 	brick_x += brick_vx*dt; 
 
-	if (brick_x <= 0 || brick_x >= BackBufferWidth - BRICK_WIDTH) {
+	// NOTE: BackBufferWidth is indeed related to rendering!!
+	float right_edge = BackBufferWidth - BRICK_WIDTH;
+
+	if (brick_x < 0 || brick_x > right_edge) {
 
 		brick_vx = -brick_vx;
 
 		//	//Why not having these logics would make the brick disappear sometimes?  
-		////	if (brick_x <= 0)
+		////	if (brick_x < 0)
 		////	{
 		////		brick_x = 0;
 		////	}
-		////	else if (brick_x >= BackBufferWidth - BRICK_WIDTH)
+		////	else if (brick_x > right_edge )
 		////	{
-		////		brick_x = BackBufferWidth - BRICK_WIDTH;
+		////		brick_x = right_edge;
 		////	}
 	}
 }
