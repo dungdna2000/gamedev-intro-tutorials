@@ -214,7 +214,7 @@ void LoadResources()
 */
 void Update(DWORD dt)
 {
-	for (int i = 0; i < objects.size(); i++)
+	for (int i = 0; i < (int)objects.size(); i++)
 	{
 		objects[i]->Update(dt);
 	}
@@ -236,7 +236,7 @@ void Render()
 	FLOAT NewBlendFactor[4] = { 0,0,0,0 };
 	pD3DDevice->OMSetBlendState(g->GetAlphaBlending(), NewBlendFactor, 0xffffffff);
 
-	for (int i = 0; i < objects.size(); i++)
+	for (int i = 0; i < (int)objects.size(); i++)
 	{
 		objects[i]->Render();
 	}
