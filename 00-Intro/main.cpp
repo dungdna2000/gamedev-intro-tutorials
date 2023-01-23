@@ -37,6 +37,8 @@ WARNING: This one file example has a hell LOT of *sinful* programming practices
 #include <time.h>
 #include <stdlib.h>
 
+#include <comdef.h>
+
 #define WINDOW_CLASS_NAME L"SampleWindow"
 #define WINDOW_TITLE L"00 - Intro"
 #define WINDOW_ICON_PATH L"brick.ico" 
@@ -145,9 +147,39 @@ void InitDirectX(HWND hWnd)
 	swapChainDesc.SampleDesc.Quality = 0;
 	swapChainDesc.Windowed = TRUE;
 
+	HRESULT hr = S_OK;
+
+	//
+	// Uncomment the following section to query graphic cards on the computer
+	//  
+
+	/*
+	IDXGIFactory* pFactory = NULL;
+	#pragma comment(lib, "dxgi")
+	hr = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&pFactory);
+	if (hr != S_OK)
+	{
+		_com_error err(hr);
+		LPCTSTR errMsg = err.ErrorMessage();
+
+		DebugOut((wchar_t*)L"[ERROR] CreateDXGIFactory has failed %s %d %d %s\n", _W(__FILE__), __LINE__, hr, errMsg);
+		return;
+	}
+
+	IDXGIAdapter* pAdapter = NULL;
+	for (UINT i = 0; 
+			pFactory->EnumAdapters(i, &pAdapter) != DXGI_ERROR_NOT_FOUND; 
+     ++i) 
+	{
+		DXGI_ADAPTER_DESC adapterDesc;
+		pAdapter->GetDesc(&adapterDesc);
+		DebugOut((wchar_t*)L"[INFO] Adapter %d: %s\n",i, adapterDesc.Description);
+	}
+	*/
+
 	// Create the D3D device and the swap chain
-	HRESULT hr = D3D10CreateDeviceAndSwapChain(NULL,
-		D3D10_DRIVER_TYPE_REFERENCE,
+	hr = D3D10CreateDeviceAndSwapChain(NULL,
+		D3D10_DRIVER_TYPE_HARDWARE,
 		NULL,
 		0,
 		D3D10_SDK_VERSION,
@@ -157,7 +189,10 @@ void InitDirectX(HWND hWnd)
 
 	if (hr != S_OK)
 	{
-		DebugOut((wchar_t*)L"[ERROR] D3D10CreateDeviceAndSwapChain has failed %s %d", _W(__FILE__), __LINE__);
+		_com_error err(hr);
+		LPCTSTR errMsg = err.ErrorMessage();
+
+		DebugOut((wchar_t*)L"[ERROR] D3D10CreateDeviceAndSwapChain has failed %s %d %d %s\n", _W(__FILE__), __LINE__, hr, errMsg );
 		return;
 	}
 
