@@ -150,7 +150,6 @@ public:
 	void OnCollisionWith(LPCOLLISIONEVENT e);
 
 	void SetLevel(int l);
-	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount64(); }
-
+	void StartUntouchable();
 	void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 };

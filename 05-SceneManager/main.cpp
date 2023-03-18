@@ -42,6 +42,7 @@ HOW TO INSTALL Microsoft.DXSDK.D3DX
 #include "SampleKeyEventHandler.h"
 
 #include "AssetIDs.h"
+#include "GameTimer.h"
 
 #define WINDOW_CLASS_NAME L"SampleWindow"
 #define MAIN_WINDOW_TITLE L"04 - Collision"
@@ -150,7 +151,11 @@ int Run()
 {
 	MSG msg;
 	int done = 0;
-	ULONGLONG frameStart = GetTickCount64();
+
+	LPGAMETIMER timer = CGameTimer::GetInstance();
+
+	ULONGLONG frameStart = timer->GetTickCount();
+
 	DWORD tickPerFrame = 1000 / MAX_FRAME_RATE;
 
 	while (!done)
@@ -163,7 +168,7 @@ int Run()
 			DispatchMessage(&msg);
 		}
 
-		ULONGLONG now = GetTickCount64();
+		ULONGLONG now = timer->GetTickCount();
 
 		// dt: the time between (beginning of last frame) and now
 		// this frame: the frame we are about to render
