@@ -78,6 +78,7 @@ D3DX10_SPRITE spriteBrick;
 float brick_x = BRICK_START_X;
 float brick_vx = BRICK_START_VX;
 float brick_y = BRICK_START_Y;
+float mario = MARIO_k;
 
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
