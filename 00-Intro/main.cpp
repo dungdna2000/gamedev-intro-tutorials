@@ -76,8 +76,6 @@ ID3DX10Sprite* spriteObject = NULL;				// Sprite handling object
 D3DX10_SPRITE spriteBrick;
 
 float brick_x = BRICK_START_X;
-float brick_vx = BRICK_START_VX;
-float brick_y = BRICK_START_Y;
 float mario = MARIO_k;
 
 
