@@ -444,7 +444,7 @@ void Reload()
 	}
 
 	// Second cloud platform 
-	CPlatform* p = new CPlatform(90.0f, GROUND_Y - 74.0f,
+	CPlatform* p = new CPlatform(90.0f, GROUND_Y - 34.0f,
 		16, 15, 16, ID_SPRITE_CLOUD_BEGIN, ID_SPRITE_CLOUD_MIDDLE, ID_SPRITE_CLOUD_END);
 	objects.push_back(p);
 
