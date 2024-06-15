@@ -24,8 +24,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		untouchable = 0;
 	}
 
-	isOnPlatform = false;
-
 	CCollision::GetInstance()->Process(this, dt, coObjects);
 }
 
@@ -33,6 +31,7 @@ void CMario::OnNoCollision(DWORD dt)
 {
 	x += vx * dt;
 	y += vy * dt;
+	isOnPlatform = false;
 }
 
 void CMario::OnCollisionWith(LPCOLLISIONEVENT e)
